@@ -1,0 +1,26 @@
+/* 
+ * Author:  Corentin Debains
+ * Email:   cdebains@iit.edu
+ *
+ * Author:  Pedro Alvarez-Tabio
+ * Email:   palvare3@iit.edu
+ *
+ *
+ * Datasys @ Illinois Institute of Technology
+ *
+ *
+ * June 2012
+ */
+
+This library is a wrapper to use Erasure-codes Libraries. It is based on Gibraltar interface.
+
+Currently, 2 libraries are supported. To have them available, download and extract the library folder in the lib folder with its original name (specified below)
+	- Jerasure, only RS encoding (Jerasure-1.2)
+	- Gibraltar, using CUDA (libgibraltar-1.0)
+
+
+USER: Examples are provided in the examples folder.
+The interface is similar to Gibraltar's. You only need to include the wrapper (#include <ecwrapper.h>) in your source file and initialize the ecFunctions with the library you want to use.
+
+DEVELOPER:
+To add a new library to the wrapper, you need to provide the function to fill a ecFunctions structure and an initialization function. See jerasureCompatibility.c (in src) and .h (in inc) for more instructions.
