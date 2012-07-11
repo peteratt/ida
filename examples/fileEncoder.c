@@ -13,6 +13,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include "../inc/ffsnet.h"
+
 int main(int argc, char* argv[]) {
 
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)

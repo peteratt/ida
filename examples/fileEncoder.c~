@@ -12,7 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
+
+#include "../inc/ffsnet.h"
 
 int main(int argc, char* argv[]) {
 
@@ -22,5 +23,6 @@ int main(int argc, char* argv[]) {
 	int m = atoi(argv[3]);
 	int bufsize = atoi(argv[4]);
 	
-	return ecFileEncode(filename, k, m, bufsize);
+	ecFileEncode(filename, k, m, bufsize);
+	return ecFileSend(filename, k, m);
 }
