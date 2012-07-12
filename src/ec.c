@@ -1,5 +1,5 @@
-#include <ec.h>
-#include "../inc/ffsnet.h"
+#include "../inc/ec.h"
+#include "../inc/ffsnet_bridger.h"
 
 int ecFileEncode(char *filename, int k, int m, int bufsize) {
 	

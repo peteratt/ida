@@ -11,7 +11,7 @@ CXX=g++
 CFLAGS=-Wall -Llib -Iinc -g -std=c99
 CPPFLAGS=-lstdc++ -Llib -Iinc
 
-LFLAGS=-lpthread -lecwrapper
+LFLAGS=-pthread -lecwrapper # -lpthread does not work whereas -pthread does. This may be the contrary for cpp binaries compilation.
 
 OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o
 
