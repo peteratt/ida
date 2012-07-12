@@ -80,11 +80,26 @@ obj:
 	mkdir -p obj/c
 	mkdir -p obj/cpp
 	
+<<<<<<< HEAD
 obj/cpp/%.o: src/%.cpp obj
 	$(CXX) $(CPPFLAGS) -c src/$*.cpp -o obj/cpp/$*.o
 	
 obj/c/%.o: src/%.c obj
 	$(CC) $(CFLAGS) -c src/$*.c -o obj/c/$*.o
+=======
+obj/ffsnet.o: src/ffsnet.cpp obj
+	$(CPP) $(CPPFLAGS) -c src/ffsnet.cpp -o obj/ffsnet.o
+	$(CPP) $(CPPFLAGS) -c src/ffsnet_bridger.cpp -o obj/ffsnet_bridger.o
+
+obj/%.o: src/%.c obj
+	$(CC) $(CFLAGS) -c src/$*.c -o obj/$*.o
+
+# A special kind of rule:  These files don't need to be remade if they're
+# out of date, just destroyed.
+cache:  src/gib_cuda_checksum.cu
+	rm -rf cache
+	mkdir cache
+>>>>>>> 88e29250391eeb9afe436742974b4e562126958e
 
 clean:
 	rm -rf obj

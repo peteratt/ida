@@ -263,7 +263,7 @@ int ecFileSend(char *filename, int k, int m) {
 
 		// Send them right after through UDT to the server
 		// TODO: Needs error treatment
-		//ffs_sendfile("udt", "127.0.0.1", "9001", chunkname, chunkname);
+		ffs_sendfile_c("udt", "127.0.0.1", "9001", chunkname, chunkname);
 	}
 	
 	return 0;
@@ -279,7 +279,7 @@ int ecFileReceive(char *filename, int k, int m) {
 
 		// Receive them right after through UDT from the server
 		// TODO: Needs error treatment
-		//ffs_recvfile("udt", "127.0.0.1", "9001", chunkname, chunkname);
+		ffs_recvfile_c("udt", "127.0.0.1", "9001", chunkname, chunkname);
 	}
 	
 	return 0;
