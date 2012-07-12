@@ -11,6 +11,9 @@
  * To compile this single file:
  * 		g++ ffsnet.cpp -c -o ffsnet.o -I../src -L../src -ludt -lstdc++ -lpthread
  *		NOTE: -I../src (similarly to -L../src) means to include the directory of the udt library, i.e. libudt.so 
+ *
+ * To compile it to a shared library:
+ * 		g++ ffsnet.cpp -fPIC --shared -o libffsnet.so -I../src -L../src -ludt -lstdc++ -lpthread
  */
 
 #include <arpa/inet.h>
@@ -230,5 +233,5 @@ _sendfile_udt(const char *remote_ip, const char *server_port, const char *local_
 	ifs.close();   
 
 	/* use this function to release the UDT library */
-	UDT::cleanup();
+	UDT::cleanup();	
 }
