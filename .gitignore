@@ -10,3 +10,10 @@
 *.lai
 *.la
 *.a
+
+# IDA Binaries
+bin/ffsnetd
+examples/example
+examples/ffsnet_test_c
+examples/fileDecoder
+examples/fileEncoder
