@@ -6,24 +6,24 @@
 #
 
 CC=gcc
-CPP=g++
-CFLAGS=-Wall -Llib -Iinc -g -std=c99
-CPPFLAGS=-I../lib/udt4/src -L../lib/udt4/src -ludt -lstdc++ -lpthread
-CUDAINC=-I $(CUDA_INC_PATH)
-CUDALIB=-L $(CUDA_LIB_PATH)
-LFLAGS=-lecwrapper
-OBJECTS=obj/ec.o
+CXX=g++
 
-#tocheck
-#.PHONY: clean jerasure examples
+CFLAGS=-Wall -Llib -Iinc -g -std=c99
+CPPFLAGS=-lstdc++ -Llib -Iinc
+
+LFLAGS=-lpthread -lecwrapper
+
+OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o
+
+.PHONY: clean jerasure examples
 
 all:
+	make bin/ffsnetd
 	make examples
 
 #######################################################
 #Jerasure-1.2
-#LFLAGS+=-ljerasure
-OBJECTS += obj/jerasureCompatibility.o
+OBJECTS += obj/c/jerasureCompatibility.o
 LIBS+=libjerasure.a
 
 lib/libjerasure.a: 
@@ -32,11 +32,15 @@ lib/libjerasure.a:
 
 #######################################################
 #Gibraltar (CUDA)
+
+CUDAINC=-I $(CUDA_INC_PATH)
+CUDALIB=-L $(CUDA_LIB_PATH)
+
 CFLAGS+=$(CUDAINC)
-#LFLAGS+=-lgibraltar
-LFLAGS+=$(CUDALIB) 
+LFLAGS+=$(CUDALIB)
+ 
 LFLAGS+=-lcudart -lcuda
-OBJECTS+= obj/gibraltarCompatibility.o
+OBJECTS+=obj/c/gibraltarCompatibility.o
 LIBS+=libgibraltar.a
 
 lib/libgibraltar.a:  
@@ -44,41 +48,55 @@ lib/libgibraltar.a:
 	ar rus lib/libgibraltar.a lib/libgibraltar-1.0/obj/*.o
 
 #######################################################
+#UDT (required by FFSNET)
+UDTLOC=lib/udt4
+CFLAGS+=-I$(UDTLOC)/src
+CPPFLAGS+=-I$(UDTLOC)/src
+LFLAGS+=-L$(UDTLOC)/src -ludt
+
+libudt:
+	cd $(UDTLOC) && make -e arch=AMD64 ## Please refer to UDT Readme for compilation
+
+#######################################################
 
 examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/example.c -o examples/example $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileEncoder.c -o examples/fileEncoder $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileDecoder.c -o examples/fileDecoder $(LFLAGS)
+	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
-lib/libecwrapper.a: libs $(OBJECTS)
+bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a
+	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(LFLAGS)
+
+lib/libecwrapper.a: obj libs $(OBJECTS)
+	mv obj/c/*.o obj/
+	mv obj/cpp/*.o obj/
 	ar rus lib/libecwrapper.a obj/*.o 
 
 # If you don't have CUDA, remove lib/libgibraltar.a
-libs: lib/libgibraltar.a lib/libjerasure.a
+libs: lib/libgibraltar.a lib/libjerasure.a libudt
 	$(foreach var,$(LIBS),ar x lib/$(var); )
 	mv *.o obj/
 
 obj:
 	mkdir -p obj
+	mkdir -p obj/c
+	mkdir -p obj/cpp
+
+obj/cpp/%.o: src/%.cpp obj
+	$(CXX) $(CPPFLAGS) -c src/$*.cpp -o obj/cpp/$*.o
 	
-obj/ffsnet.o: src/ffsnet.cpp obj
-	$(CPP) $(CPPFLAGS) -c src/ffsnet.cpp -o obj/ffsnet.o
-	$(CPP) $(CPPFLAGS) -c src/ffsnet_bridger.cpp -o obj/ffsnet_bridger.o
+obj/c/%.o: src/%.c obj
+	$(CC) $(CFLAGS) -c src/$*.c -o obj/c/$*.o
 
-obj/%.o: src/%.c obj
-	$(CC) $(CFLAGS) -c src/$*.c -o obj/$*.o
-
-# A special kind of rule:  These files don't need to be remade if they're
-# out of date, just destroyed.
-cache:  src/gib_cuda_checksum.cu
-	rm -rf cache
-	mkdir cache
 
 clean:
-	rm -rf obj cache LFLAGS
+	rm -rf obj
 	rm -f examples/example
 	rm -f examples/fileEncoder
 	rm -f examples/fileDecoder
+	rm -f examples/ffsnet_test_c
 
 mrproper: clean
 	rm -f lib/*.a
+	rm -f bin/ffsnetd
