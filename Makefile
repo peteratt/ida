@@ -7,10 +7,10 @@
 
 CC=gcc
 CXX=g++
+
 CFLAGS=-Wall -Llib -Iinc -g -std=c99
-CPPFLAGS=-lstdc++ 
-CUDAINC=-I $(CUDA_INC_PATH)
-CUDALIB=-L $(CUDA_LIB_PATH)
+CPPFLAGS=-lstdc++ -Llib -Iinc
+
 LFLAGS=-lpthread -lecwrapper
 
 OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o
@@ -23,7 +23,6 @@ all:
 
 #######################################################
 #Jerasure-1.2
-#LFLAGS+=-ljerasure
 OBJECTS += obj/c/jerasureCompatibility.o
 LIBS+=libjerasure.a
 
@@ -33,9 +32,13 @@ lib/libjerasure.a:
 
 #######################################################
 #Gibraltar (CUDA)
+
+CUDAINC=-I $(CUDA_INC_PATH)
+CUDALIB=-L $(CUDA_LIB_PATH)
+
 CFLAGS+=$(CUDAINC)
-#LFLAGS+=-lgibraltar
-LFLAGS+=$(CUDALIB) 
+LFLAGS+=$(CUDALIB)
+ 
 LFLAGS+=-lcudart -lcuda
 OBJECTS+=obj/c/gibraltarCompatibility.o
 LIBS+=libgibraltar.a
@@ -63,7 +66,7 @@ examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
 bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a
-	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(CPPLFLAGS)
+	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(LFLAGS)
 
 lib/libecwrapper.a: obj libs $(OBJECTS)
 	mv obj/c/*.o obj/
@@ -79,27 +82,13 @@ obj:
 	mkdir -p obj
 	mkdir -p obj/c
 	mkdir -p obj/cpp
-	
-<<<<<<< HEAD
+
 obj/cpp/%.o: src/%.cpp obj
 	$(CXX) $(CPPFLAGS) -c src/$*.cpp -o obj/cpp/$*.o
 	
 obj/c/%.o: src/%.c obj
 	$(CC) $(CFLAGS) -c src/$*.c -o obj/c/$*.o
-=======
-obj/ffsnet.o: src/ffsnet.cpp obj
-	$(CPP) $(CPPFLAGS) -c src/ffsnet.cpp -o obj/ffsnet.o
-	$(CPP) $(CPPFLAGS) -c src/ffsnet_bridger.cpp -o obj/ffsnet_bridger.o
 
-obj/%.o: src/%.c obj
-	$(CC) $(CFLAGS) -c src/$*.c -o obj/$*.o
-
-# A special kind of rule:  These files don't need to be remade if they're
-# out of date, just destroyed.
-cache:  src/gib_cuda_checksum.cu
-	rm -rf cache
-	mkdir cache
->>>>>>> 88e29250391eeb9afe436742974b4e562126958e
 
 clean:
 	rm -rf obj
