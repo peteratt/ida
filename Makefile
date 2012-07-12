@@ -63,6 +63,7 @@ obj:
 	
 obj/ffsnet.o: src/ffsnet.cpp obj
 	$(CPP) $(CPPFLAGS) -c src/ffsnet.cpp -o obj/ffsnet.o
+	$(CPP) $(CPPFLAGS) -c src/ffsnet_bridger.cpp -o obj/ffsnet_bridger.o
 
 obj/%.o: src/%.c obj
 	$(CC) $(CFLAGS) -c src/$*.c -o obj/$*.o

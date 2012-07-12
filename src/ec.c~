@@ -1,4 +1,5 @@
 #include <ec.h>
+#include "../inc/ffsnet.h"
 
 int ecFileEncode(char *filename, int k, int m, int bufsize) {
 	
@@ -249,4 +250,37 @@ int ecFileDecode(char *filename) {
     	ec->destroy(context);
 	
 	return EXIT_SUCCESS;
+}
+
+int ecFileSend(char *filename, int k, int m) {
+	int n = k + m;
+	char chunkname[128];
+	int i;
+	
+	for (i = 1; i <= n; i++) {
+		// Register the chunks
+		sprintf(chunkname, "%s.%d", filename, i);
+
+		// Send them right after through UDT to the server
+		// TODO: Needs error treatment
+		ffs_sendfile_c("udt", "127.0.0.1", "9001", chunkname, chunkname);
+	}
+	
+	return 0;
+}
+
+int ecFileReceive(char *filename, int k, int m) {
+	char chunkname[128];
+	int i;
+	
+	for (i = 1; i <= k; i++) {
+		// Register the chunks
+		sprintf(chunkname, "%s.%d", filename, i);
+
+		// Receive them right after through UDT from the server
+		// TODO: Needs error treatment
+		ffs_recvfile_c("udt", "127.0.0.1", "9001", chunkname, chunkname);
+	}
+	
+	return 0;
 }
