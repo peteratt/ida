@@ -257,7 +257,7 @@ int ecFileSend(char *filename, int k, int m) {
 	char chunkname[128];
 	int i;
 	
-	for (i = 1; i <= n; i++) {
+	for (i = 0; i < n; i++) {
 		// Register the chunks
 		sprintf(chunkname, "%s.%d", filename, i);
 
@@ -273,7 +273,7 @@ int ecFileReceive(char *filename, int k, int m) {
 	char chunkname[128];
 	int i;
 	
-	for (i = 1; i <= k; i++) {
+	for (i = 0; i < k; i++) {
 		// Register the chunks
 		sprintf(chunkname, "%s.%d", filename, i);
 
