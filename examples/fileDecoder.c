@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "../inc/ffsnet.h"
+#include <ffsnet_bridger.h>
 
 int main(int argc, char* argv[]) {
 	//INPUTS: Filename to Decode

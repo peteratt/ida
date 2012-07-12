@@ -2,7 +2,6 @@
  * Interface for library calls to EC
  */
 #include <ecwrapper.h>
-#include <ffsnet.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>

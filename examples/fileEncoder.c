@@ -7,13 +7,14 @@
  * File Encoder Example for Erasure-Coding Libraries
  */
 
-#include <ec.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
-#include "../inc/ffsnet.h"
+#include <ffsnet_bridger.h>
+#include <ec.h>
 
 int main(int argc, char* argv[]) {
 
