@@ -23,7 +23,7 @@ all:
 
 #######################################################
 #Jerasure-1.2
-OBJECTS += obj/c/jerasureCompatibility.o
+OBJECTS+=obj/c/jerasureCompatibility.o
 LIBS+=libjerasure.a
 
 lib/libjerasure.a: 
@@ -58,6 +58,15 @@ libudt:
 	cd $(UDTLOC) && make -e arch=AMD64 ## Please refer to UDT Readme for compilation
 
 #######################################################
+###ZHT Library Compilation and import
+LFLAGS+=-lzht
+CFLAGS+=-Ilib/ZHT/inc
+
+zht: lib/ZHT/Makefile
+	cd lib/ZHT && make
+	cp lib/ZHT/lib/libzht.a lib/
+
+######################################################
 
 examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/example.c -o examples/example $(LFLAGS)
