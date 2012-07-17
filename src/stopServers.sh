@@ -15,7 +15,7 @@ if [ -d "$TESTINGFOLDER" ]; then
 	done
 fi
 
-if [ ! -a $PIDFILE ] then
+if [ ! -a $PIDFILE ]; then
 	echo "$PIDFILE does not exist, exiting..."
 	exit 1
 fi
