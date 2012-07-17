@@ -26,7 +26,7 @@ for ((i = 1; i <= $1; i++)); do
 	echo "localhost:$port" >> $ZHTNEIGHBORFILE
 done
 
-FFSNETSERVER=../bin/bin/ffsnetd
+FFSNETSERVER=../bin/ffsnetd
 ZHTSERVER=../lib/ZHT/bin/server_zht
 ZHTCONFIG=../lib/ZHT/zht.cfg
 
