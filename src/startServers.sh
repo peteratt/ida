@@ -14,7 +14,7 @@ ZHTNEIGHBORFILE=zhtNeighborFile
 >$ZHTNEIGHBORFILE
 
 PIDFILE=servers.pid
-if [ -a $PIDFILE ] then
+if [ -a $PIDFILE ]; then
 	./stopServers.sh
 	rm $PIDFILE
 fi
