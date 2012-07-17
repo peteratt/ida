@@ -74,7 +74,7 @@ examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/fileDecoder.c -o examples/fileDecoder $(LFLAGS)
 	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
-bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a
+bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a zht
 	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(LFLAGS)
 
 lib/libecwrapper.a: obj libs $(OBJECTS)
