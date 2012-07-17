@@ -14,7 +14,7 @@ ZHTNEIGHBORFILE=zhtNeighborFile
 >$ZHTNEIGHBORFILE
 
 PIDFILE=servers.pid
-if [[ -a $PIDFILE ]]; then
+if [ -a $PIDFILE ]; then
 	./stopServers.sh
 	rm $PIDFILE
 fi
@@ -26,7 +26,7 @@ for ((i = 1; i <= $1; i++)); do
 	echo "localhost:$port" >> $ZHTNEIGHBORFILE
 done
 
-FFSNETSERVER=../bin/ffsnetd
+FFSNETSERVER=../../bin/ffsnetd
 ZHTSERVER=../lib/ZHT/bin/server_zht
 ZHTCONFIG=../lib/ZHT/zht.cfg
 
@@ -37,11 +37,11 @@ mkdir $TESTINGFOLDER
 rm -rf $TESTINGFOLDER/*
 
 for ((i = 1; i <= $1; i++)); do
-	mkdir $TESTINGFOLDER/serv$1
-	cd $TESTINGFOLDER/serv$1
+	mkdir $TESTINGFOLDER/serv$i
+	cd $TESTINGFOLDER/serv$i
 	port=$(($i+9000))	
 	$FFSNETSERVER $port &
-	echo $! >> $PIDFILE
+	echo $! >> $BACKFROMTESTING$PIDFILE
 	cd $BACKFROMTESTING
 	
 	port=$(($i+50000))
