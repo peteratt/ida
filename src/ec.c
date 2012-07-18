@@ -1,3 +1,5 @@
+#include   <stdbool.h>
+
 #include "../inc/ec.h"
 #include "../inc/ffsnet_bridger.h"
 
@@ -283,4 +285,25 @@ int ecFileReceive(char *filename, int k, int m) {
 	}
 	
 	return 0;
+}
+
+int ecInsertMetadata(char* neighbors, char* config) {
+	
+	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
+	
+	const char *key = "hello";
+	const char *value = "zht";
+
+	int iret = c_zht_insert2(key, value);
+	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
+
+	char *result = NULL;
+	int lret = c_zht_lookup2(key, &result);
+	fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
+	fprintf(stderr, "c_zht_lookup, return value: %s\n", result);
+
+	int rret = c_zht_remove2(key);
+	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
+
+	c_zht_teardown();
 }
