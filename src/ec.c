@@ -3,6 +3,8 @@
 #include "../inc/ec.h"
 #include "../inc/ffsnet_bridger.h"
 
+#include <c_zhtclient.h>
+
 int ecFileEncode(char *filename, int k, int m, int bufsize) {
 	
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)
