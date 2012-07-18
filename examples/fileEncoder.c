@@ -25,5 +25,6 @@ int main(int argc, char* argv[]) {
 	int bufsize = atoi(argv[4]);
 	
 	ecFileEncode(filename, k, m, bufsize);
+	ecInsertMetadata("neighbors", "config");
 	return ecFileSend(filename, k, m);
 }
