@@ -12,3 +12,5 @@ int ecFileEncode(char *filename, int k, int m, int bufsize);
 int ecFileDecode(char *filename);
 int ecFileSend(char *filename, int k, int m);
 int ecFileReceive(char *filename, int k, int m);
+int ecInsertMetadata(char *neighbors, char *config);
+
