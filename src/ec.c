@@ -257,64 +257,70 @@ int ecFileDecode(char *filename) {
 	return EXIT_SUCCESS;
 }
 
-int getLocations(char * filehash, struct comLocations loc, int minimum){
-	int n = loc.locationsNumber;
+int getLocations(char * filehash, struct comLocations * loc, int minimum){
+	int n = loc->locationsNumber;
 	int currentLocationsNumber,i;
-	char ** host = (char **) malloc(n*sizeof(char *));
-	int * port = (int *) malloc(n*sizeof(int));
+	char * host;
 	
-	char ** distantChunk = (char **) malloc(n*sizeof(char *));
-	char ** localChunk = (char **) malloc(n*sizeof(char *));
+	char * distantChunk;
+	char * localChunk;
 	
 	int FFSNETPORTSTART = 9001;
 	char chunkname[128];
 	
+	struct comTransfer * prev = NULL;
+	struct comTransfer * current;
 	//1. We acquire the locations [Static Here], Dynamic is TODO
+	//Currently the list implementation makes the most important the LAST one of the list.
 	for (i = 0; i < n; i++) {
-		host[i] = (char *) malloc(strlen("localhost")+1);
-		host[i] = "localhost";
 		
-		port[i] = FFSNETPORTSTART + i;
+		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
+	
+		current->hostName = (char *) malloc(strlen("localhost")+1);
+		current->hostName = "localhost";
+		
+		current->port = FFSNETPORTSTART + i;
 		
 		sprintf(chunkname, "%s.%d", filehash, i);
-		distantChunk[i] = (char *) malloc(strlen(chunkname)+1);
-		distantChunk[i] = chunkname;
+		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
+		current->distantChunkName = chunkname;
 		
-		localChunk[i] = (char *) malloc(strlen(chunkname)+1);
-		localChunk[i] = chunkname;
+		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
+		current->localChunkName = chunkname;
 		
 		currentLocationsNumber++;
+		current->next = prev;
+		prev = current;
 	}
-		
+	
+	loc.transfers = prev;
+	
 	//2. We check that locations are enough to reconstruct the file. If not, exit. If yes, adjust the actual number of locations that we return. (should be between minimum and the original locationsNumber)
 	if(currentLocationsNumber < minimum){
 		return 1; //That should be defined as a constant: NOTENOUGHLOCATIONS
 	}
 	loc.locationsNumber = currentLocationsNumber;
 	
-	//3. We fill the structure
-	loc.hostsNames = host;
-	loc.ports = port;
-	loc.distantChunknames = distantChunk;
-	loc.localChunknames = localChunk;
-	
 	return 0;
 }
 
-void free_struct_comLocations(struct comLocations loc){
+void free_struct_comLocations(struct comLocations * loc){
+	
 	int n = loc.locationsNumber;
 	int i;
 	
-	for(i=0; i < n; i++){
-		free(loc.hostsNames[i]);
-		free(loc.distantChunk[i]);
-		free(loc.localChunk[i]);
-	}
+	struct comTransfer * current = loc.transfers;
+	struct comTransfer * tofree;
 	
-	free(loc.hostsNames);
-	free(loc.ports);
-	free(loc.distantChunk);
-	free(loc.localChunk);
+	while(current != NULL){
+		free(current->hostsName);
+		free(current->distantChunkName);
+		free(current->localChunkName);
+		
+		tofree = current;
+		current = current->next;
+		free(tofree);
+	}
 }
 
 int ecFileSend(char *filename, int k, int m) {
@@ -326,7 +332,7 @@ int ecFileSend(char *filename, int k, int m) {
 	
 	loc.locationsNumber = n;
 	
-	getLocations(filename,loc,n);
+	getLocations(filename,&loc,n);
 	
 	for (i = 0; i < loc.locationsNumber; i++) {
 		// Send the chunks through UDT to the server
@@ -334,7 +340,7 @@ int ecFileSend(char *filename, int k, int m) {
 		ffs_sendfile_c("udt", loc.hostsNames[i], loc.ports[i], loc.distantChunk[i], loc.localChunk[i]);
 	}
 	
-	free_struct_comLocations(loc);//Free the structure
+	free_struct_comLocations(&loc);//Free the structure
 	
 	return 0;
 }
