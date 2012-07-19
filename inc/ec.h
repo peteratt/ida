@@ -8,9 +8,18 @@
 #include <string.h>
 #include <time.h>
 
+struct comLocations {
+	int locationsNumber;
+	char ** hostsNames;
+	int * ports;
+	char ** distantChunknames;
+	char ** localChunknames;
+};
+
 int ecFileEncode(char *filename, int k, int m, int bufsize);
 int ecFileDecode(char *filename);
 int ecFileSend(char *filename, int k, int m);
 int ecFileReceive(char *filename, int k, int m);
 int ecInsertMetadata(char *neighbors, char *config);
-
+void free_struct_comLocations(struct comLocations loc);
+int getLocations(char * filehash, struct comLocations loc, int minimum);
