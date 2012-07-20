@@ -4,6 +4,7 @@
 #include "../inc/ffsnet_bridger.h"
 
 #include <c_zhtclient.h>
+#include <malloc.h>
 
 int ecFileEncode(char *filename, int k, int m, int bufsize) {
 	
@@ -256,19 +257,90 @@ int ecFileDecode(char *filename) {
 	return EXIT_SUCCESS;
 }
 
+int getLocations(char * filehash, struct comLocations * loc, int minimum){
+	int n = loc->locationsNumber;
+	int currentLocationsNumber,i;
+	char * host;
+	
+	char * distantChunk;
+	char * localChunk;
+	
+	int FFSNETPORTSTART = 9001;
+	char chunkname[128];
+	
+	struct comTransfer * prev = NULL;
+	struct comTransfer * current;
+	//1. We acquire the locations [Static Here], Dynamic is TODO
+	//Currently the list implementation makes the most important the LAST one of the list.
+	for (i = 0; i < n; i++) {
+		
+		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
+	
+		current->hostName = (char *) malloc(strlen("localhost")+1);
+		current->hostName = "localhost";
+		
+		current->port = FFSNETPORTSTART + i;
+		
+		sprintf(chunkname, "%s.%d", filehash, i);
+		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
+		current->distantChunkName = chunkname;
+		
+		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
+		current->localChunkName = chunkname;
+		
+		currentLocationsNumber++;
+		current->next = prev;
+		prev = current;
+	}
+	
+	loc.transfers = prev;
+	
+	//2. We check that locations are enough to reconstruct the file. If not, exit. If yes, adjust the actual number of locations that we return. (should be between minimum and the original locationsNumber)
+	if(currentLocationsNumber < minimum){
+		return 1; //That should be defined as a constant: NOTENOUGHLOCATIONS
+	}
+	loc.locationsNumber = currentLocationsNumber;
+	
+	return 0;
+}
+
+void free_struct_comLocations(struct comLocations * loc){
+	
+	int n = loc.locationsNumber;
+	int i;
+	
+	struct comTransfer * current = loc.transfers;
+	struct comTransfer * tofree;
+	
+	while(current != NULL){
+		free(current->hostsName);
+		free(current->distantChunkName);
+		free(current->localChunkName);
+		
+		tofree = current;
+		current = current->next;
+		free(tofree);
+	}
+}
+
 int ecFileSend(char *filename, int k, int m) {
 	int n = k + m;
 	char chunkname[128];
 	int i;
 	
-	for (i = 0; i < n; i++) {
-		// Register the chunks
-		sprintf(chunkname, "%s.%d", filename, i);
-
-		// Send them right after through UDT to the server
+	struct comLocations loc;
+	
+	loc.locationsNumber = n;
+	
+	getLocations(filename,&loc,n);
+	
+	for (i = 0; i < loc.locationsNumber; i++) {
+		// Send the chunks through UDT to the server
 		// TODO: Needs error treatment
-		ffs_sendfile_c("udt", "127.0.0.1", "9001", chunkname, chunkname);
+		ffs_sendfile_c("udt", loc.hostsNames[i], loc.ports[i], loc.distantChunk[i], loc.localChunk[i]);
 	}
+	
+	free_struct_comLocations(&loc);//Free the structure
 	
 	return 0;
 }
@@ -289,32 +361,14 @@ int ecFileReceive(char *filename, int k, int m) {
 	return 0;
 }
 
-int ecInsertMetadata(char* filename, char* neighbors, char* config) {
+int ecInsertMetadata(char* neighbors, char* config) {
 	
 	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
 	
 	const char *key = "hello";
 	const char *value = "zht";
-	
-	// Insert the Package
-	Package package;
-	
-	char *virtualpath;
-	sprintf(virtualpath, "ida://%s", filename)
-	
-	package.set_virtualpath(virtualpath); //as key
-	package.set_isdir(false);
-	package.set_replicano(1); //orginal--Note: never let it be nagative!!!
-	package.set_operation(3); // 3 for insert, 1 for look up, 2 for remove
-	package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
-	package.add_listitem("item-----1");
-	package.add_listitem("item-----2");
-	package.add_listitem("item-----3");
-	package.add_listitem("item-----4");
-	package.add_listitem("item-----5");
-	string str = package.SerializeAsString();
 
-	int iret = c_zht_insert(str);
+	int iret = c_zht_insert2(key, value);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
 
 	char *result = NULL;
@@ -326,88 +380,4 @@ int ecInsertMetadata(char* filename, char* neighbors, char* config) {
 	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
 
 	c_zht_teardown();
-	
-	return 0;
-}
-
-int ecLookupMetadata(char* filename, char* neighbors, char* config) {
-	
-	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
-	
-	const char *key = "hello";
-	const char *value = "zht";
-	
-	// Insert the Package
-	Package package;
-	
-	char *virtualpath;
-	sprintf(virtualpath, "ida://%s", filename)
-	
-	package.set_virtualpath(virtualpath); //as key
-	package.set_isdir(false);
-	package.set_replicano(1); //orginal--Note: never let it be nagative!!!
-	package.set_operation(3); // 3 for insert, 1 for look up, 2 for remove
-	package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
-	package.add_listitem("item-----1");
-	package.add_listitem("item-----2");
-	package.add_listitem("item-----3");
-	package.add_listitem("item-----4");
-	package.add_listitem("item-----5");
-	string str = package.SerializeAsString();
-
-	int iret = c_zht_insert(str);
-	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
-
-	char *result = NULL;
-	int lret = c_zht_lookup2(key, &result);
-	fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
-	fprintf(stderr, "c_zht_lookup, return value: %s\n", result);
-
-	int rret = c_zht_remove2(key);
-	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
-
-	c_zht_teardown();
-	
-	return 0;
-}
-
-int ecRemoveMetadata(char* filename, char* neighbors, char* config) {
-	
-	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
-	
-	const char *key = "hello";
-	const char *value = "zht";
-	
-	// Insert the Package
-	Package package;
-	
-	char *virtualpath;
-	sprintf(virtualpath, "ida://%s", filename)
-	
-	package.set_virtualpath(virtualpath); //as key
-	package.set_isdir(false);
-	package.set_replicano(1); //orginal--Note: never let it be nagative!!!
-	package.set_operation(3); // 3 for insert, 1 for look up, 2 for remove
-	package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
-	package.add_listitem("item-----1");
-	package.add_listitem("item-----2");
-	package.add_listitem("item-----3");
-	package.add_listitem("item-----4");
-	package.add_listitem("item-----5");
-	string str = package.SerializeAsString();
-
-	int iret = c_zht_insert(str);
-	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
-
-	char *result = NULL;
-	int lret = c_zht_lookup2(key, &result);
-	fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
-	fprintf(stderr, "c_zht_lookup, return value: %s\n", result);
-
-	int rret = c_zht_remove2(key);
-	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
-
-	c_zht_teardown();
-	
-	return 0;
 }
