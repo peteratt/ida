@@ -289,14 +289,32 @@ int ecFileReceive(char *filename, int k, int m) {
 	return 0;
 }
 
-int ecInsertMetadata(char* neighbors, char* config) {
+int ecInsertMetadata(char* filename, char* neighbors, char* config) {
 	
 	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
 	
 	const char *key = "hello";
 	const char *value = "zht";
+	
+	// Insert the Package
+	Package package;
+	
+	char *virtualpath;
+	sprintf(virtualpath, "ida://%s", filename)
+	
+	package.set_virtualpath(virtualpath); //as key
+	package.set_isdir(false);
+	package.set_replicano(1); //orginal--Note: never let it be nagative!!!
+	package.set_operation(3); // 3 for insert, 1 for look up, 2 for remove
+	package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
+	package.add_listitem("item-----1");
+	package.add_listitem("item-----2");
+	package.add_listitem("item-----3");
+	package.add_listitem("item-----4");
+	package.add_listitem("item-----5");
+	string str = package.SerializeAsString();
 
-	int iret = c_zht_insert2(key, value);
+	int iret = c_zht_insert(str);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
 
 	char *result = NULL;
@@ -308,4 +326,88 @@ int ecInsertMetadata(char* neighbors, char* config) {
 	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
 
 	c_zht_teardown();
+	
+	return 0;
+}
+
+int ecLookupMetadata(char* filename, char* neighbors, char* config) {
+	
+	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
+	
+	const char *key = "hello";
+	const char *value = "zht";
+	
+	// Insert the Package
+	Package package;
+	
+	char *virtualpath;
+	sprintf(virtualpath, "ida://%s", filename)
+	
+	package.set_virtualpath(virtualpath); //as key
+	package.set_isdir(false);
+	package.set_replicano(1); //orginal--Note: never let it be nagative!!!
+	package.set_operation(3); // 3 for insert, 1 for look up, 2 for remove
+	package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
+	package.add_listitem("item-----1");
+	package.add_listitem("item-----2");
+	package.add_listitem("item-----3");
+	package.add_listitem("item-----4");
+	package.add_listitem("item-----5");
+	string str = package.SerializeAsString();
+
+	int iret = c_zht_insert(str);
+	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
+
+	char *result = NULL;
+	int lret = c_zht_lookup2(key, &result);
+	fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
+	fprintf(stderr, "c_zht_lookup, return value: %s\n", result);
+
+	int rret = c_zht_remove2(key);
+	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
+
+	c_zht_teardown();
+	
+	return 0;
+}
+
+int ecRemoveMetadata(char* filename, char* neighbors, char* config) {
+	
+	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
+	
+	const char *key = "hello";
+	const char *value = "zht";
+	
+	// Insert the Package
+	Package package;
+	
+	char *virtualpath;
+	sprintf(virtualpath, "ida://%s", filename)
+	
+	package.set_virtualpath(virtualpath); //as key
+	package.set_isdir(false);
+	package.set_replicano(1); //orginal--Note: never let it be nagative!!!
+	package.set_operation(3); // 3 for insert, 1 for look up, 2 for remove
+	package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
+	package.add_listitem("item-----1");
+	package.add_listitem("item-----2");
+	package.add_listitem("item-----3");
+	package.add_listitem("item-----4");
+	package.add_listitem("item-----5");
+	string str = package.SerializeAsString();
+
+	int iret = c_zht_insert(str);
+	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
+
+	char *result = NULL;
+	int lret = c_zht_lookup2(key, &result);
+	fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
+	fprintf(stderr, "c_zht_lookup, return value: %s\n", result);
+
+	int rret = c_zht_remove2(key);
+	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
+
+	c_zht_teardown();
+	
+	return 0;
 }
