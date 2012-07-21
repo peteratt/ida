@@ -13,6 +13,11 @@ CPPFLAGS=-lstdc++ -Llib -Iinc
 
 LFLAGS=-pthread -lecwrapper # -lpthread does not work whereas -pthread does. This may be the contrary for cpp binaries compilation.
 
+PROTOBUF_HOME=/usr/local/include/google/protobuf #your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
+CFLAGS+=-I$(PROTOBUF_HOME)
+LFLAGS+=-lprotobuf
+
+
 OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o
 
 .PHONY: clean jerasure examples

@@ -6,7 +6,7 @@
 #include <c_zhtclient.h>
 #include <malloc.h>
 
-int ecFileEncode(char *filename, int k, int m, int bufsize) {
+int ecFileEncode(char *filename, int k, int m, int bufsize){
 	
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)
 
@@ -260,10 +260,6 @@ int ecFileDecode(char *filename) {
 int getLocations(char * filehash, struct comLocations * loc, int minimum){
 	int n = loc->locationsNumber;
 	int currentLocationsNumber,i;
-	char * host;
-	
-	char * distantChunk;
-	char * localChunk;
 	
 	int FFSNETPORTSTART = 9001;
 	char chunkname[128];
@@ -293,27 +289,24 @@ int getLocations(char * filehash, struct comLocations * loc, int minimum){
 		prev = current;
 	}
 	
-	loc.transfers = prev;
+	loc->transfers = prev;
 	
 	//2. We check that locations are enough to reconstruct the file. If not, exit. If yes, adjust the actual number of locations that we return. (should be between minimum and the original locationsNumber)
 	if(currentLocationsNumber < minimum){
 		return 1; //That should be defined as a constant: NOTENOUGHLOCATIONS
 	}
-	loc.locationsNumber = currentLocationsNumber;
+	loc->locationsNumber = currentLocationsNumber;
 	
 	return 0;
 }
 
 void free_struct_comLocations(struct comLocations * loc){
 	
-	int n = loc.locationsNumber;
-	int i;
-	
-	struct comTransfer * current = loc.transfers;
+	struct comTransfer * current = loc->transfers;
 	struct comTransfer * tofree;
 	
 	while(current != NULL){
-		free(current->hostsName);
+		free(current->hostName);
 		free(current->distantChunkName);
 		free(current->localChunkName);
 		
@@ -325,8 +318,9 @@ void free_struct_comLocations(struct comLocations * loc){
 
 int ecFileSend(char *filename, int k, int m) {
 	int n = k + m;
-	char chunkname[128];
 	int i;
+	
+	char port_str[10];
 	
 	struct comLocations loc;
 	
@@ -334,10 +328,16 @@ int ecFileSend(char *filename, int k, int m) {
 	
 	getLocations(filename,&loc,n);
 	
+	struct comTransfer * curTransfer = loc.transfers;
+	
 	for (i = 0; i < loc.locationsNumber; i++) {
 		// Send the chunks through UDT to the server
+		
+		sprintf(port_str, "%d", curTransfer->port);
+		
 		// TODO: Needs error treatment
-		ffs_sendfile_c("udt", loc.hostsNames[i], loc.ports[i], loc.distantChunk[i], loc.localChunk[i]);
+		ffs_sendfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		curTransfer = curTransfer->next;
 	}
 	
 	free_struct_comLocations(&loc);//Free the structure
@@ -380,4 +380,6 @@ int ecInsertMetadata(char* neighbors, char* config) {
 	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
 
 	c_zht_teardown();
+	
+	return 0;
 }

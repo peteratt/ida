@@ -16,10 +16,10 @@ struct comLocations {
 struct comTransfer {
 	char * hostName;
 	int port;
-	char * distantchunkName;
-	char * localchunkName;
-	struct comLocations * next;
-}
+	char * distantChunkName;
+	char * localChunkName;
+	struct comTransfer * next;
+};
 
 int ecFileEncode(char *filename, int k, int m, int bufsize);
 int ecFileDecode(char *filename);
