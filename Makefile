@@ -11,11 +11,14 @@ CXX=g++
 CFLAGS=-Wall -Llib -Iinc -g -std=c99
 CPPFLAGS=-lstdc++ -Llib -Iinc
 
-LFLAGS=-pthread -lecwrapper # -lpthread does not work whereas -pthread does. This may be the contrary for cpp binaries compilation.
+LFLAGS=-pthread # -lpthread does not work whereas -pthread does. This may be the contrary for cpp binaries compilation.
+
 
 PROTOBUF_HOME=/usr/local/include/google/protobuf #your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
 CFLAGS+=-I$(PROTOBUF_HOME)
 LFLAGS+=-lprotobuf
+
+LFLAGS+=-lecwrapper #Well...this is our library!
 
 
 OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o
@@ -64,8 +67,9 @@ libudt:
 
 #######################################################
 ###ZHT Library Compilation and import
-LFLAGS+=-lzht
+#LFLAGS+=-lzht
 CFLAGS+=-Ilib/ZHT/inc
+LIBS+=libzht.a
 
 zht: lib/ZHT/Makefile
 	cd lib/ZHT && make
@@ -79,7 +83,7 @@ examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/fileDecoder.c -o examples/fileDecoder $(LFLAGS)
 	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
-bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a zht
+bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a 
 	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(LFLAGS)
 
 lib/libecwrapper.a: obj libs $(OBJECTS)
@@ -88,7 +92,7 @@ lib/libecwrapper.a: obj libs $(OBJECTS)
 	ar rus lib/libecwrapper.a obj/*.o 
 
 # If you don't have CUDA, remove lib/libgibraltar.a
-libs: lib/libgibraltar.a lib/libjerasure.a libudt
+libs: lib/libgibraltar.a lib/libjerasure.a zht libudt
 	$(foreach var,$(LIBS),ar x lib/$(var); )
 	mv *.o obj/
 
