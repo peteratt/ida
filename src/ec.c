@@ -4,8 +4,9 @@
 #include "../inc/ffsnet_bridger.h"
 
 #include <c_zhtclient.h>
+#include <malloc.h>
 
-int ecFileEncode(char *filename, int k, int m, int bufsize) {
+int ecFileEncode(char *filename, int k, int m, int bufsize){
 	
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)
 
@@ -256,19 +257,90 @@ int ecFileDecode(char *filename) {
 	return EXIT_SUCCESS;
 }
 
+int getLocations(char * filehash, struct comLocations * loc, int minimum){
+	int n = loc->locationsNumber;
+	int currentLocationsNumber,i;
+	
+	int FFSNETPORTSTART = 9001;
+	char chunkname[128];
+	
+	struct comTransfer * prev = NULL;
+	struct comTransfer * current;
+	//1. We acquire the locations [Static Here], Dynamic is TODO
+	//Currently the list implementation makes the most important the LAST one of the list.
+	for (i = 0; i < n; i++) {
+		
+		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
+	
+		current->hostName = (char *) malloc(strlen("localhost")+1);
+		current->hostName = "localhost";
+		
+		current->port = FFSNETPORTSTART + i;
+		
+		sprintf(chunkname, "%s.%d", filehash, i);
+		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
+		current->distantChunkName = chunkname;
+		
+		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
+		current->localChunkName = chunkname;
+		
+		currentLocationsNumber++;
+		current->next = prev;
+		prev = current;
+	}
+	
+	loc->transfers = prev;
+	
+	//2. We check that locations are enough to reconstruct the file. If not, exit. If yes, adjust the actual number of locations that we return. (should be between minimum and the original locationsNumber)
+	if(currentLocationsNumber < minimum){
+		return 1; //That should be defined as a constant: NOTENOUGHLOCATIONS
+	}
+	loc->locationsNumber = currentLocationsNumber;
+	
+	return 0;
+}
+
+void free_struct_comLocations(struct comLocations * loc){
+	
+	struct comTransfer * current = loc->transfers;
+	struct comTransfer * tofree;
+	
+	while(current != NULL){
+		free(current->hostName);
+		free(current->distantChunkName);
+		free(current->localChunkName);
+		
+		tofree = current;
+		current = current->next;
+		free(tofree);
+	}
+}
+
 int ecFileSend(char *filename, int k, int m) {
 	int n = k + m;
-	char chunkname[128];
 	int i;
 	
-	for (i = 0; i < n; i++) {
-		// Register the chunks
-		sprintf(chunkname, "%s.%d", filename, i);
-
-		// Send them right after through UDT to the server
+	char port_str[10];
+	
+	struct comLocations loc;
+	
+	loc.locationsNumber = n;
+	
+	getLocations(filename,&loc,n);
+	
+	struct comTransfer * curTransfer = loc.transfers;
+	
+	for (i = 0; i < loc.locationsNumber; i++) {
+		// Send the chunks through UDT to the server
+		
+		sprintf(port_str, "%d", curTransfer->port);
+		
 		// TODO: Needs error treatment
-		ffs_sendfile_c("udt", "127.0.0.1", "9001", chunkname, chunkname);
+		ffs_sendfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		curTransfer = curTransfer->next;
 	}
+	
+	free_struct_comLocations(&loc);//Free the structure
 	
 	return 0;
 }
@@ -308,4 +380,6 @@ int ecInsertMetadata(char* neighbors, char* config) {
 	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
 
 	c_zht_teardown();
+	
+	return 0;
 }
