@@ -6,6 +6,7 @@
 #include <c_zhtclient.h>
 #include <malloc.h>
 #include <string.h>
+#include <pthread.h>
 
 int ecFileEncode(char *filename, int k, int m, int bufsize){
 	
@@ -318,13 +319,25 @@ void free_struct_comLocations(struct comLocations * loc){
 	}
 }
 
+
+void * threadSendFunc(void * args){
+		struct comTransfer * curTransfer = (struct comTransfer *)args;
+		
+		char port_str[10];
+		sprintf(port_str, "%d", curTransfer->port);
+		
+		printf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		ffs_sendfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		
+		return NULL;
+};
+
 int ecFileSend(char *filename, int k, int m) {
 	int n = k + m;
 	int i;
 	
-	char port_str[10];
-	
 	struct comLocations loc;
+	pthread_t threads[n];
 	
 	loc.locationsNumber = n;
 	
@@ -335,12 +348,13 @@ int ecFileSend(char *filename, int k, int m) {
 	for (i = 0; i < loc.locationsNumber; i++) {
 		// Send the chunks through UDT to the server
 		
-		sprintf(port_str, "%d", curTransfer->port);
-		
 		// TODO: Needs error treatment
-		printf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		ffs_sendfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		pthread_create(&threads[i], NULL, &threadSendFunc, (void *)curTransfer);
 		curTransfer = curTransfer->next;
+	}
+	
+	for (i = 0; i < loc.locationsNumber; i++) {
+		pthread_join(threads[i], NULL);
 	}
 	
 	free_struct_comLocations(&loc);//Free the structure
@@ -348,29 +362,41 @@ int ecFileSend(char *filename, int k, int m) {
 	return 0;
 }
 
+void * threadRecvFunc(void * args){
+		struct comTransfer * curTransfer = (struct comTransfer *)args;
+		
+		char port_str[10];
+		sprintf(port_str, "%d", curTransfer->port);
+		
+		printf("Receiving: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->localChunkName, curTransfer->distantChunkName);
+		
+		return NULL;
+};
+
 int ecFileReceive(char *filename, int k, int m) {
 	int n = k + m;
 	int i;
 	
-	char port_str[10];
-	
 	struct comLocations loc;
+	pthread_t threads[n];
 	
-	loc.locationsNumber = n;
+	loc.locationsNumber = n; 
 	
-	getLocations(filename,&loc,n);
+	getLocations(filename,&loc,k); // the minimum we need is k (no worries if we get less locations)
 	
 	struct comTransfer * curTransfer = loc.transfers;
 	
 	for (i = 0; i < loc.locationsNumber; i++) {
 		// Send the chunks through UDT to the server
 		
-		sprintf(port_str, "%d", curTransfer->port);
-		
 		// TODO: Needs error treatment
-		printf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->localChunkName, curTransfer->distantChunkName);
+		pthread_create(&threads[i], NULL, &threadRecvFunc, (void *)curTransfer);
 		curTransfer = curTransfer->next;
+	}
+	
+	for (i = 0; i < loc.locationsNumber; i++) {
+		pthread_join(threads[i], NULL);
 	}
 	
 	free_struct_comLocations(&loc);//Free the structure
