@@ -8,7 +8,7 @@
 #include <string.h>
 #include <pthread.h>
 
-int ecFileEncode(char *filename, int k, int m, int bufsize){
+struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize){
 	
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)
 
@@ -79,21 +79,29 @@ int ecFileEncode(char *filename, int k, int m, int bufsize){
 		printf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
 
 	//Filename
 	fprintf(destinationMeta,"%s\n",filename);
+	meta->filename = filename;
 	//FileSize
 	fprintf(destinationMeta,"%ld\n",ftell(source));
+	meta->fileSize = ftell(source);
 	//Time of Encoding
 	time_t rawtime;
 	time ( &rawtime );
   	fprintf (destinationMeta,"%s", ctime (&rawtime) );
 	//Parameters
 	fprintf(destinationMeta,"%i %i\n", k, m);
+	meta->k = k;
+	meta->m = m;
 	//Type of encoding
 	//TODO
+	meta->encodingLib = libraryId;
+	
 	//Buffer size
 	fprintf(destinationMeta,"%i\n",bufsize);
+	meta->bufsize = bufsize;
 
 	/* Close files */
 	fclose(source);
@@ -105,7 +113,7 @@ int ecFileEncode(char *filename, int k, int m, int bufsize){
 	ec->free(buffers, context);
     	ec->destroy(context);
 	
-	return EXIT_SUCCESS;
+	return meta;
 }
 
 int ecFileDecode(char *filename) {
@@ -404,7 +412,7 @@ int ecFileReceive(char *filename, int k, int m) {
 	return 0;
 }
 
-int ecInsertMetadata(char* neighbors, char* config) {
+int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
 	
 	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
 	

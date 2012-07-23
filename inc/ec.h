@@ -21,6 +21,15 @@ struct comTransfer {
 	struct comTransfer * next;
 };
 
+struct metadata {
+	char *filename;
+	int k;
+	int m;
+	int encodingLib;
+	long fileSize;
+	int bufsize;
+};
+
 int ecFileEncode(char *filename, int k, int m, int bufsize);
 int ecFileDecode(char *filename);
 int ecFileSend(char *filename, int k, int m);
