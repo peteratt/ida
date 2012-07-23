@@ -1,6 +1,16 @@
 /*
+ * Author:  Corentin Debains
+ * Email:   cdebains@iit.edu
+ *
+ * Author:  Pedro Alvarez-Tabio
+ * Email:   palvare3@iit.edu
+ *
+ */
+
+/*
  * Interface for library calls to EC
  */
+#include "globals.h"
 #include <ecwrapper.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,7 +31,7 @@ struct comTransfer {
 	struct comTransfer * next;
 };
 
-int ecFileEncode(char *filename, int k, int m, int bufsize);
+int ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId);
 int ecFileDecode(char *filename);
 int ecFileSend(char *filename, int k, int m);
 int ecFileReceive(char *filename, int k, int m);

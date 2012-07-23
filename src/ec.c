@@ -1,3 +1,13 @@
+/*
+ * Author:  Corentin Debains
+ * Email:   cdebains@iit.edu
+ *
+ * Author:  Pedro Alvarez-Tabio
+ * Email:   palvare3@iit.edu
+ *
+ */
+
+
 #include   <stdbool.h>
 
 #include "../inc/ec.h"
@@ -8,9 +18,25 @@
 #include <string.h>
 #include <pthread.h>
 
-int ecFileEncode(char *filename, int k, int m, int bufsize){
+int ec_init_Library(int libraryId, ecFunctions *ec){
+	//This function has to be modified for any library addition
+	switch(libraryId){
+		case GIBRALTAR:
+			ec_init_Gibraltar(ec);
+			break;
+		case JERASURERS:
+			ec_init_JerasureRS(ec);
+			break;
+		default:
+			return 1;
+	}
 	
-	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)
+	return 0;
+}
+
+int ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId){
+	
+	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B), Library ID (see globals.h for available libs)
 
 	char filenameDest[256];
 
@@ -22,7 +48,8 @@ int ecFileEncode(char *filename, int k, int m, int bufsize){
 	ecFunctions ec;
     ecContext context;
 
-	ec_init_Gibraltar(&ec); //If Gibraltar
+	ec_init_Library(libraryId, &ec);
+	//ec_init_Gibraltar(&ec); //If Gibraltar
 	//ec_init_JerasureRS(&ec); //if Jerasure Reed Solomon
 	
 	int rc = ec->init(k, m, &context);
@@ -149,6 +176,8 @@ int ecFileDecode(char *filename) {
 	ecFunctions ec;
     ecContext context;
 
+	//TODO WE NEED THE LIBRARY HERE
+	//ec_init_Library(libraryId, &ec);
 	ec_init_Gibraltar(&ec); //If Gibraltar
 	//ec_init_JerasureRS(&ec); //if Jerasure Reed Solomon
 	
