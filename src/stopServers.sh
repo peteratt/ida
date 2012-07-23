@@ -21,7 +21,7 @@ if [ ! -f $PIDFILE ]; then
 fi
 
 while read line; do
-    kill -2 $line
+    kill $line
 done < $PIDFILE
 
 

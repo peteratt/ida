@@ -5,6 +5,7 @@
 
 #include <c_zhtclient.h>
 #include <malloc.h>
+#include <string.h>
 
 int ecFileEncode(char *filename, int k, int m, int bufsize){
 	
@@ -259,7 +260,8 @@ int ecFileDecode(char *filename) {
 
 int getLocations(char * filehash, struct comLocations * loc, int minimum){
 	int n = loc->locationsNumber;
-	int currentLocationsNumber,i;
+	int currentLocationsNumber = 0;
+	int i;
 	
 	int FFSNETPORTSTART = 9001;
 	char chunkname[128];
@@ -273,16 +275,16 @@ int getLocations(char * filehash, struct comLocations * loc, int minimum){
 		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
 	
 		current->hostName = (char *) malloc(strlen("localhost")+1);
-		current->hostName = "localhost";
+		strcpy(current->hostName,"localhost");
 		
 		current->port = FFSNETPORTSTART + i;
 		
 		sprintf(chunkname, "%s.%d", filehash, i);
 		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
-		current->distantChunkName = chunkname;
+		strcpy(current->distantChunkName,chunkname);
 		
 		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
-		current->localChunkName = chunkname;
+		strcpy(current->localChunkName,chunkname);
 		
 		currentLocationsNumber++;
 		current->next = prev;
@@ -336,6 +338,7 @@ int ecFileSend(char *filename, int k, int m) {
 		sprintf(port_str, "%d", curTransfer->port);
 		
 		// TODO: Needs error treatment
+		printf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		ffs_sendfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		curTransfer = curTransfer->next;
 	}
@@ -346,17 +349,31 @@ int ecFileSend(char *filename, int k, int m) {
 }
 
 int ecFileReceive(char *filename, int k, int m) {
-	char chunkname[128];
+	int n = k + m;
 	int i;
 	
-	for (i = 0; i < k; i++) {
-		// Register the chunks
-		sprintf(chunkname, "%s.%d", filename, i);
-
-		// Receive them right after through UDT from the server
+	char port_str[10];
+	
+	struct comLocations loc;
+	
+	loc.locationsNumber = n;
+	
+	getLocations(filename,&loc,n);
+	
+	struct comTransfer * curTransfer = loc.transfers;
+	
+	for (i = 0; i < loc.locationsNumber; i++) {
+		// Send the chunks through UDT to the server
+		
+		sprintf(port_str, "%d", curTransfer->port);
+		
 		// TODO: Needs error treatment
-		ffs_recvfile_c("udt", "127.0.0.1", "9001", chunkname, chunkname);
+		printf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->localChunkName, curTransfer->distantChunkName);
+		curTransfer = curTransfer->next;
 	}
+	
+	free_struct_comLocations(&loc);//Free the structure
 	
 	return 0;
 }
