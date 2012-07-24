@@ -10,9 +10,9 @@
 
 #include   <stdbool.h>
 
+#include "../inc/zht_bridger.h"
 #include "../inc/ec.h"
 #include "../inc/ffsnet_bridger.h"
-#include "../inc/zht_bridger.h"
 
 #include <c_zhtclient.h>
 #include <malloc.h>

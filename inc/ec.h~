@@ -10,6 +10,9 @@
 /*
  * Interface for library calls to EC
  */
+#ifndef EC_H_
+#define EC_H_ 
+ 
 #include "globals.h"
 #include <ecwrapper.h>
 #include <stdlib.h>
@@ -47,3 +50,5 @@ int ecFileReceive(char *filename, int k, int m);
 int ecInsertMetadata(char *neighbors, char *config, struct metadata* meta);
 void free_struct_comLocations(struct comLocations * loc);
 int getLocations(char * filehash, struct comLocations * loc, int minimum);
+
+#endif // EC_H_
