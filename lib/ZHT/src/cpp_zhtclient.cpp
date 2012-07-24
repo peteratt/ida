@@ -1,6 +1,6 @@
-#include "../inc/cpp_zhtclient.h"
-#include "../inc/lru_cache.h"
-
+#include "cpp_zhtclient.h"
+#include "lru_cache.h"
+#include <stdint.h>
 
 /*******************************
  * zhouxb
@@ -9,7 +9,7 @@
 struct timeval tp;
 int MAX_FILE_SIZE = 10000; //1GB, too big, use dynamic memory malloc.
 
-int const MAX_MSG_SIZE = 1024; //transferd string maximum size
+int const MAX_MSG_SIZE = 65535; //transferd string maximum size
 
 int REPLICATION_TYPE; //1 for Client-side replication
 
@@ -47,7 +47,6 @@ int setconfigvariables(string cfgFile) {
 /*******************************
  * zhouxb
  */
-
 
 int UDP_SOCKET = -1;
 int CACHE_SIZE = 1024;
@@ -310,6 +309,10 @@ int ZHTClient::lookup(string str, string &returnStr) {
 	char buff[MAX_MSG_SIZE]; //MAX_MSG_SIZE
 	memset(buff, 0, sizeof(buff));
 	int rcv_size = -1;
+	int status = -1;
+	string sRecv;
+	string sStatus;
+
 	if (sentSize == str.length()) { //this only work for TCP. UDP need to make a new one so accept returns from server.
 //		cout << "before protocol judge" << endl;
 
@@ -339,16 +342,20 @@ int ZHTClient::lookup(string str, string &returnStr) {
 		 }*/
 		if (rcv_size < 0) {
 			cout << "Lookup receive error." << endl;
-			return rcv_size;
 		} else {
-			returnStr.assign(buff);
+			sRecv.assign(buff);
+			returnStr = sRecv.substr(3); //the left is real thing need to be deserilized.
+			sStatus = sRecv.substr(0, 3); //the first three chars means status code, like -1, -2, 0, -98, -99 and so on.
 		}
 
 //		cout << "after protocol judge" << endl;
 	}
 //	d3_closeConnection(sock);
 
-	return rcv_size;
+	if (!sStatus.empty())
+		status = atoi(sStatus.c_str());
+
+	return status;
 }
 /*
  int ZHTClient::lookup(string str, string &returnStr, int to_sock) {

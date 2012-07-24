@@ -15,13 +15,14 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <errno.h>
+#include <stdint.h>
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
-#include "../inc/zht_util.h"
-#include "../inc/novoht.h"
+#include "zht_util.h"
+#include "novoht.h"
 
 using namespace std;
 #define MAXEVENTS 64
@@ -44,7 +45,7 @@ bool TCP; // for switch between TCP and UDP
 struct timeval tp;
 int MAX_FILE_SIZE = 10000; //1GB, too big, use dynamic memory malloc.
 
-int const MAX_MSG_SIZE = 1024; //transferd string maximum size
+int const MAX_MSG_SIZE = 65535; //transferd string maximum size
 
 int REPLICATION_TYPE; //1 for Client-side replication
 
@@ -161,7 +162,7 @@ int32_t HB_insert(NoVoHT *map, Package &package) {
 //	cout << "end inserting, ret = " << ret << endl;
 
 	if (ret != 0) {
-		return -3;
+		return -2;
 	}
 	/*
 	 cout << "String insted: " << package_str << endl;
@@ -399,7 +400,7 @@ void dataService(int client_sock, void* buff, sockaddr_in fromAddr,
 	//cout << "Current service thread ID = " << pthread_self()<< ", dbService() begin..." << endl;
 
 //	char buff[MAX_MSG_SIZE];
-	int32_t operation_status;
+	int32_t operation_status = -99; //
 //	sockaddr_in toAddr;
 	int r;
 	void* buff1;
@@ -414,6 +415,7 @@ void dataService(int client_sock, void* buff, sockaddr_in fromAddr,
 
 	switch (package.operation()) {
 	case 1: //lookup
+	{
 //		cout << "Lookup..." << endl;
 		if (package.virtualpath().empty()) {
 //			cerr << "Bad key: nothing to find" << endl;
@@ -429,33 +431,25 @@ void dataService(int client_sock, void* buff, sockaddr_in fromAddr,
 
 			if (result.compare("Empty") == 0) {
 				operation_status = -2;
+			} else {
+				operation_status = 0;
 			}
 		}
 
-		//find result, send back here
-
-//				cout << "Lookup: Result found, sending back..." << endl;
-//				cout << "What I found on server: \n";
-//				cout << result.c_str() << endl;
-
-		buff1 = &operation_status;
-		generalSendBack(client_sock, result.c_str(), fromAddr, 0, TCP);
-
 		/*
-		 if (TRANS_PROTOCOL == USE_TCP) {
-		 d3_send_data(client_sock, (void*) result.c_str(),
-		 result.length(), 0, &toAddr); //TCP reuse the socket and connection.
-
-		 } else if (TRANS_PROTOCOL == USE_UDP) {
-
-		 d3_send_data(server_sock, (void*) (result.c_str()),
-		 result.length() + 1, 0, &toAddr);
-
-		 }
+		 * pack the status and lookup-result into one string
 		 */
-		//end lookup if-else case
+		buff1 = &operation_status;
+		char statusBuff[3];
+		sprintf(statusBuff, "%03d", operation_status);
+		string sAllInOne;
+		sAllInOne.append(statusBuff);
+		sAllInOne.append(result);
+
+		generalSendBack(client_sock, sAllInOne.c_str(), fromAddr, 0, TCP);
+	}
 		break;
-	case 2:
+	case 2: {
 		//remove
 		//		cout << "Remove..." << endl;
 		//cout << "Package:key "<<package.virtualpath()<<endl;
@@ -485,8 +479,9 @@ void dataService(int client_sock, void* buff, sockaddr_in fromAddr,
 		}
 		//			cout << "Remove succeeded, return " << operation_status << endl;
 		//end remove if-else
+	}
 		break;
-	case 3:
+	case 3: {
 		//insert
 		if (package.virtualpath().empty()) {
 			operation_status = -1;
@@ -517,13 +512,24 @@ void dataService(int client_sock, void* buff, sockaddr_in fromAddr,
 					<< "Insert: Server could not send acknowledgement to client: sendto r = "
 					<< r << endl;
 		}
+	}
 		break;
-	case 99: //shut the server
+	case 99: { //shut the server
 //		cout << "Server will be shut shortly." << endl;
 		turn_off = 1; //turn off service.
+	}
 		break;
-	default:
-		operation_status = -99; //no this operation
+	default: {
+		operation_status = -98; //unrecognized operation
+
+		buff1 = &operation_status;
+		if (TCP == true) {
+			r = send(client_sock, &operation_status, sizeof(int32_t), 0);
+		} else {
+			r = sendto(client_sock, &operation_status, sizeof(int32_t), 0,
+					(struct sockaddr *) &fromAddr, sizeof(struct sockaddr));
+		}
+	}
 		break;
 	} //end switch-case
 
@@ -725,7 +731,7 @@ int main(int argc, char *argv[]) {
 		n = epoll_wait(efd, events, MAXEVENTS, -1);
 
 		epollCounter++;
-//		printf("epoll %d times", epollCounter);
+//		printf("epoll %d times ", epollCounter);
 
 		for (i = 0; i < n; i++) {
 			if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)

@@ -4,8 +4,8 @@
 
 CXX=g++
 CC=gcc
-CPPFLAGS=-Xlinker -zmuldefs -g
-CFLAGS=-Llib -L/usr/local/lib -Iinc -g
+CPPFLAGS=-g -Xlinker -zmuldefs
+CFLAGS=-g -Llib -L/usr/local/lib -Iinc
 LFLAGS=-lzht
 LFLAGS+=-lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
 
@@ -46,7 +46,9 @@ obj:
 
 clients: src/cpp_zhtclient.cpp src/c_zhtclient.cpp
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/cpp_zhtclient.cpp -o obj/cpp_zhtclient.o
+	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/c_zhtclientStd.cpp -o obj/c_zhtclientStd.o
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/c_zhtclient.cpp -o obj/c_zhtclient.o
+
 
 obj/%.o: src/common/%.cpp obj
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/common/$*.cpp -o obj/$*.o
