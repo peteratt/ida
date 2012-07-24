@@ -24,13 +24,10 @@ int main(int argc, char* argv[]) {
 	int m = atoi(argv[3]);
 	int bufsize = atoi(argv[4]);
 	
-<<<<<<< HEAD
-	struct metadata* meta = ecFileEncode(filename, k, m, bufsize);
+
+	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,GIBRALTAR);
 	ecInsertMetadata("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg", meta);
 	free(meta);
-=======
-	ecFileEncode(filename, k, m, bufsize, GIBRALTAR);
-	//ecInsertMetadata("neighbors", "config");
->>>>>>> 88c6ec485d2b9123585ca1d2f8222bda8637e05a
+	
 	return ecFileSend(filename, k, m);
 }
