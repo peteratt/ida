@@ -12,6 +12,7 @@
 
 #include "../inc/ec.h"
 #include "../inc/ffsnet_bridger.h"
+#include "../inc/zht_bridger.h"
 
 #include <c_zhtclient.h>
 #include <malloc.h>
@@ -445,10 +446,9 @@ int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
 	
 	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
 	
-	const char *key = "hello";
-	const char *value = "zht";
+	char* parsedPackage = zht_parse_meta(meta);
 
-	int iret = c_zht_insert2(key, value);
+	int iret = c_zht_insert(parsedPackage);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
 
 	char *result = NULL;
