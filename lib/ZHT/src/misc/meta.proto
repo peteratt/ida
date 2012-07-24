@@ -12,5 +12,11 @@ message Package{
 	optional int32 mode = 7;
 
 	optional int32 Operation = 8; //1 for look up, 2 for remove, 3 for insert	
-	optional int32 replicaNo =9; //nagative number means it's not an original request.
+	optional int32 replicaNo = 9; //nagative number means it's not an original request.
+	
+	optional int32 k = 10;
+	optional int32 m = 11;
+	optional int32 fileSize = 12;
+	optional int32 bufsize = 13;
+	optional int32 encodingLib = 14;
 }
