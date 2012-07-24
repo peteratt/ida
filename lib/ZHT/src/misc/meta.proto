@@ -1,4 +1,4 @@
-message Package{
+message Package {
 	//optional string virtualPath = 1;
 	optional bytes virtualPath = 1;
 	optional int32 num = 2;

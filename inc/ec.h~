@@ -40,7 +40,7 @@ struct metadata {
 	int bufsize;
 };
 
-int ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId);
+struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId);
 int ecFileDecode(char *filename);
 int ecFileSend(char *filename, int k, int m);
 int ecFileReceive(char *filename, int k, int m);

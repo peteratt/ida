@@ -451,6 +451,7 @@ int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
 	int iret = c_zht_insert(parsedPackage);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
 
+	/*
 	char *result = NULL;
 	int lret = c_zht_lookup2(key, &result);
 	fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
@@ -458,6 +459,7 @@ int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
 
 	int rret = c_zht_remove2(key);
 	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
+	*/
 
 	c_zht_teardown();
 	
