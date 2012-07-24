@@ -10,14 +10,24 @@
  *
  */
 
-#include "../inc/ffsnet_bridger.h"
-#include "../inc/ffsnet.h"
+#include "../inc/zht_bridger.h"
+#include "../
 
-  int ffs_recvfile_c(const char *proto, const char *remote_ip, const char *server_port, const char *remote_filename, const char *local_filename) {
-	  return ffs_recvfile(proto, remote_ip, server_port, remote_filename, local_filename);
-  }
+char* zht_parse_meta(struct metadata* meta) {
+	Package package;
+	package.set_virtualpath(meta->filename); //as key
+	package.set_isdir(false);
+	package.set_replicano(1);
+	package.set_operation(3); //1 for look up, 2 for remove, 3 for insert
+	package.set_realfullpath(meta->filename);
+	
+	// IDA metadata
+	package.set_k(meta->k);
+	package.set_m(meta->m);
+	package.set_encodinglib(meta->encodingLib);
+	package.set_filesize(meta->fileSize);
+	package.set_bufsize(meta->bufsize);
 
-  int ffs_sendfile_c(const char *proto, const char *remote_ip, const char *server_port, const char *local_filename, const char *remote_filename) {
-	  return ffs_sendfile(proto, remote_ip, server_port, local_filename, remote_filename);
-  }
+	return package.serializeAsString().c_str();
+}
 
