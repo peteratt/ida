@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
 	int k = atoi(argv[2]);
 	int m = atoi(argv[3]);
 	int bufsize = atoi(argv[4]);
-	
 
 	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,GIBRALTAR);
 	ecInsertMetadata("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg", meta);

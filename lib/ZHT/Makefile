@@ -4,8 +4,8 @@
 
 CXX=g++
 CC=gcc
-CPPFLAGS=-Xlinker -zmuldefs
-CFLAGS=-Llib -L/usr/local/lib -Iinc
+CPPFLAGS=-Xlinker -zmuldefs -g
+CFLAGS=-Llib -L/usr/local/lib -Iinc -g
 LFLAGS=-lzht
 LFLAGS+=-lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
 

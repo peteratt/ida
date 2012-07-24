@@ -446,9 +446,11 @@ int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
 	
 	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
 	
-	char* parsedPackage = zht_parse_meta(meta);
+	const char* parsedPackage = zht_parse_meta(meta);
+	
+	int iret = c_zht_insert("hello");
 
-	int iret = c_zht_insert(parsedPackage);
+	//int iret = c_zht_insert(parsedPackage);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
 
 	/*

@@ -9,7 +9,7 @@ CC=gcc
 CXX=g++
 
 CFLAGS=-Wall -Llib -Iinc -g -std=c99
-CPPFLAGS=-lstdc++ -Llib -Iinc
+CPPFLAGS=-g -lstdc++ -Llib -Iinc 
 
 LFLAGS=-pthread # -lpthread does not work whereas -pthread does. This may be the contrary for cpp binaries compilation.
 

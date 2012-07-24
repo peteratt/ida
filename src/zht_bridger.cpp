@@ -27,7 +27,16 @@ const char* zht_parse_meta(struct metadata* meta) {
 	package.set_encodinglib(meta->encodingLib);
 	package.set_filesize(meta->fileSize);
 	package.set_bufsize(meta->bufsize);
+	
+	std::string serialized = package.SerializeAsString();
+	
+	/*
+	Package package2;
+	package2.ParseFromString(serialized);
+	
+	int k = package2.k();
+	*/
 
-	return package.SerializeAsString().c_str();
+	return serialized.c_str();
 }
 
