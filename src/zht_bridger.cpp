@@ -11,9 +11,9 @@
  */
 
 #include "../inc/zht_bridger.h"
-#include "../
+#include "../lib/ZHT/inc/meta.pb.h"
 
-char* zht_parse_meta(struct metadata* meta) {
+const char* zht_parse_meta(struct metadata* meta) {
 	Package package;
 	package.set_virtualpath(meta->filename); //as key
 	package.set_isdir(false);
@@ -28,6 +28,6 @@ char* zht_parse_meta(struct metadata* meta) {
 	package.set_filesize(meta->fileSize);
 	package.set_bufsize(meta->bufsize);
 
-	return package.serializeAsString().c_str();
+	return package.SerializeAsString().c_str();
 }
 

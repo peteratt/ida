@@ -168,6 +168,41 @@ class Package : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 replicano() const;
   inline void set_replicano(::google::protobuf::int32 value);
   
+  // optional int32 k = 10;
+  inline bool has_k() const;
+  inline void clear_k();
+  static const int kKFieldNumber = 10;
+  inline ::google::protobuf::int32 k() const;
+  inline void set_k(::google::protobuf::int32 value);
+  
+  // optional int32 m = 11;
+  inline bool has_m() const;
+  inline void clear_m();
+  static const int kMFieldNumber = 11;
+  inline ::google::protobuf::int32 m() const;
+  inline void set_m(::google::protobuf::int32 value);
+  
+  // optional int32 fileSize = 12;
+  inline bool has_filesize() const;
+  inline void clear_filesize();
+  static const int kFileSizeFieldNumber = 12;
+  inline ::google::protobuf::int32 filesize() const;
+  inline void set_filesize(::google::protobuf::int32 value);
+  
+  // optional int32 bufsize = 13;
+  inline bool has_bufsize() const;
+  inline void clear_bufsize();
+  static const int kBufsizeFieldNumber = 13;
+  inline ::google::protobuf::int32 bufsize() const;
+  inline void set_bufsize(::google::protobuf::int32 value);
+  
+  // optional int32 encodingLib = 14;
+  inline bool has_encodinglib() const;
+  inline void clear_encodinglib();
+  static const int kEncodingLibFieldNumber = 14;
+  inline ::google::protobuf::int32 encodinglib() const;
+  inline void set_encodinglib(::google::protobuf::int32 value);
+  
   // @@protoc_insertion_point(class_scope:Package)
  private:
   inline void set_has_virtualpath();
@@ -186,6 +221,16 @@ class Package : public ::google::protobuf::Message {
   inline void clear_has_operation();
   inline void set_has_replicano();
   inline void clear_has_replicano();
+  inline void set_has_k();
+  inline void clear_has_k();
+  inline void set_has_m();
+  inline void clear_has_m();
+  inline void set_has_filesize();
+  inline void clear_has_filesize();
+  inline void set_has_bufsize();
+  inline void clear_has_bufsize();
+  inline void set_has_encodinglib();
+  inline void clear_has_encodinglib();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
@@ -198,9 +243,14 @@ class Package : public ::google::protobuf::Message {
   ::google::protobuf::int32 mode_;
   ::google::protobuf::int32 operation_;
   ::google::protobuf::int32 replicano_;
+  ::google::protobuf::int32 k_;
+  ::google::protobuf::int32 m_;
+  ::google::protobuf::int32 filesize_;
+  ::google::protobuf::int32 bufsize_;
+  ::google::protobuf::int32 encodinglib_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
   
   friend void  protobuf_AddDesc_meta_2eproto();
   friend void protobuf_AssignDesc_meta_2eproto();
@@ -506,6 +556,116 @@ inline ::google::protobuf::int32 Package::replicano() const {
 inline void Package::set_replicano(::google::protobuf::int32 value) {
   set_has_replicano();
   replicano_ = value;
+}
+
+// optional int32 k = 10;
+inline bool Package::has_k() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Package::set_has_k() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Package::clear_has_k() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void Package::clear_k() {
+  k_ = 0;
+  clear_has_k();
+}
+inline ::google::protobuf::int32 Package::k() const {
+  return k_;
+}
+inline void Package::set_k(::google::protobuf::int32 value) {
+  set_has_k();
+  k_ = value;
+}
+
+// optional int32 m = 11;
+inline bool Package::has_m() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Package::set_has_m() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Package::clear_has_m() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Package::clear_m() {
+  m_ = 0;
+  clear_has_m();
+}
+inline ::google::protobuf::int32 Package::m() const {
+  return m_;
+}
+inline void Package::set_m(::google::protobuf::int32 value) {
+  set_has_m();
+  m_ = value;
+}
+
+// optional int32 fileSize = 12;
+inline bool Package::has_filesize() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void Package::set_has_filesize() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void Package::clear_has_filesize() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void Package::clear_filesize() {
+  filesize_ = 0;
+  clear_has_filesize();
+}
+inline ::google::protobuf::int32 Package::filesize() const {
+  return filesize_;
+}
+inline void Package::set_filesize(::google::protobuf::int32 value) {
+  set_has_filesize();
+  filesize_ = value;
+}
+
+// optional int32 bufsize = 13;
+inline bool Package::has_bufsize() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void Package::set_has_bufsize() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void Package::clear_has_bufsize() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void Package::clear_bufsize() {
+  bufsize_ = 0;
+  clear_has_bufsize();
+}
+inline ::google::protobuf::int32 Package::bufsize() const {
+  return bufsize_;
+}
+inline void Package::set_bufsize(::google::protobuf::int32 value) {
+  set_has_bufsize();
+  bufsize_ = value;
+}
+
+// optional int32 encodingLib = 14;
+inline bool Package::has_encodinglib() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void Package::set_has_encodinglib() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void Package::clear_has_encodinglib() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void Package::clear_encodinglib() {
+  encodinglib_ = 0;
+  clear_has_encodinglib();
+}
+inline ::google::protobuf::int32 Package::encodinglib() const {
+  return encodinglib_;
+}
+inline void Package::set_encodinglib(::google::protobuf::int32 value) {
+  set_has_encodinglib();
+  encodinglib_ = value;
 }
 
 

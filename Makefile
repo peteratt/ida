@@ -79,10 +79,8 @@ zht: lib/ZHT/Makefile
 
 examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/example.c -o examples/example $(LFLAGS)
-	$(CC) $(CFLAGS) examples/fileEncoder.c -o examples/fileEncoder $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileSenderTEST.c -o examples/fileSenderTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileReceiverTEST.c -o examples/fileReceiverTEST $(LFLAGS)
-	$(CC) $(CFLAGS) examples/fileDecoder.c -o examples/fileDecoder $(LFLAGS)
 	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
 bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a 
@@ -113,8 +111,6 @@ obj/c/%.o: src/%.c obj
 clean:
 	rm -rf obj
 	rm -f examples/example
-	rm -f examples/fileEncoder
-	rm -f examples/fileDecoder
 	rm -f examples/ffsnet_test_c
 
 mrproper: clean

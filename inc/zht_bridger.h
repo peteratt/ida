@@ -1,8 +1,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "ec.h"
   
-  char* zht_parse_meta(struct metadata* meta);
+  const char* zht_parse_meta(struct metadata* meta);
 
 #ifdef __cplusplus
 }

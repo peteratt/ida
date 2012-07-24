@@ -29,7 +29,7 @@ void protobuf_AssignDesc_meta_2eproto() {
       "meta.proto");
   GOOGLE_CHECK(file != NULL);
   Package_descriptor_ = file->message_type(0);
-  static const int Package_offsets_[9] = {
+  static const int Package_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, virtualpath_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, num_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, realfullpath_),
@@ -39,6 +39,11 @@ void protobuf_AssignDesc_meta_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, mode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, operation_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, replicano_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, k_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, m_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, filesize_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, bufsize_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package, encodinglib_),
   };
   Package_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -81,11 +86,13 @@ void protobuf_AddDesc_meta_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\nmeta.proto\"\250\001\n\007Package\022\023\n\013virtualPath\030"
+    "\n\nmeta.proto\"\366\001\n\007Package\022\023\n\013virtualPath\030"
     "\001 \001(\014\022\013\n\003num\030\002 \001(\005\022\024\n\014realFullPath\030\003 \001(\014"
     "\022\r\n\005isDir\030\004 \001(\010\022\020\n\010listItem\030\005 \003(\014\022\020\n\010ope"
     "nMode\030\006 \001(\005\022\014\n\004mode\030\007 \001(\005\022\021\n\tOperation\030\010"
-    " \001(\005\022\021\n\treplicaNo\030\t \001(\005", 183);
+    " \001(\005\022\021\n\treplicaNo\030\t \001(\005\022\t\n\001k\030\n \001(\005\022\t\n\001m\030"
+    "\013 \001(\005\022\020\n\010fileSize\030\014 \001(\005\022\017\n\007bufsize\030\r \001(\005"
+    "\022\023\n\013encodingLib\030\016 \001(\005", 261);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "meta.proto", &protobuf_RegisterTypes);
   Package::default_instance_ = new Package();
@@ -113,6 +120,11 @@ const int Package::kOpenModeFieldNumber;
 const int Package::kModeFieldNumber;
 const int Package::kOperationFieldNumber;
 const int Package::kReplicaNoFieldNumber;
+const int Package::kKFieldNumber;
+const int Package::kMFieldNumber;
+const int Package::kFileSizeFieldNumber;
+const int Package::kBufsizeFieldNumber;
+const int Package::kEncodingLibFieldNumber;
 #endif  // !_MSC_VER
 
 Package::Package()
@@ -139,6 +151,11 @@ void Package::SharedCtor() {
   mode_ = 0;
   operation_ = 0;
   replicano_ = 0;
+  k_ = 0;
+  m_ = 0;
+  filesize_ = 0;
+  bufsize_ = 0;
+  encodinglib_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -197,6 +214,11 @@ void Package::Clear() {
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     replicano_ = 0;
+    k_ = 0;
+    m_ = 0;
+    filesize_ = 0;
+    bufsize_ = 0;
+    encodinglib_ = 0;
   }
   listitem_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -343,6 +365,86 @@ bool Package::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(80)) goto parse_k;
+        break;
+      }
+      
+      // optional int32 k = 10;
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_k:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &k_)));
+          set_has_k();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(88)) goto parse_m;
+        break;
+      }
+      
+      // optional int32 m = 11;
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_m:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &m_)));
+          set_has_m();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(96)) goto parse_fileSize;
+        break;
+      }
+      
+      // optional int32 fileSize = 12;
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_fileSize:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &filesize_)));
+          set_has_filesize();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(104)) goto parse_bufsize;
+        break;
+      }
+      
+      // optional int32 bufsize = 13;
+      case 13: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_bufsize:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &bufsize_)));
+          set_has_bufsize();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(112)) goto parse_encodingLib;
+        break;
+      }
+      
+      // optional int32 encodingLib = 14;
+      case 14: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_encodingLib:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &encodinglib_)));
+          set_has_encodinglib();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -413,6 +515,31 @@ void Package::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->replicano(), output);
   }
   
+  // optional int32 k = 10;
+  if (has_k()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->k(), output);
+  }
+  
+  // optional int32 m = 11;
+  if (has_m()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->m(), output);
+  }
+  
+  // optional int32 fileSize = 12;
+  if (has_filesize()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(12, this->filesize(), output);
+  }
+  
+  // optional int32 bufsize = 13;
+  if (has_bufsize()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(13, this->bufsize(), output);
+  }
+  
+  // optional int32 encodingLib = 14;
+  if (has_encodinglib()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(14, this->encodinglib(), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -469,6 +596,31 @@ void Package::SerializeWithCachedSizes(
   // optional int32 replicaNo = 9;
   if (has_replicano()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->replicano(), target);
+  }
+  
+  // optional int32 k = 10;
+  if (has_k()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->k(), target);
+  }
+  
+  // optional int32 m = 11;
+  if (has_m()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->m(), target);
+  }
+  
+  // optional int32 fileSize = 12;
+  if (has_filesize()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(12, this->filesize(), target);
+  }
+  
+  // optional int32 bufsize = 13;
+  if (has_bufsize()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(13, this->bufsize(), target);
+  }
+  
+  // optional int32 encodingLib = 14;
+  if (has_encodinglib()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(14, this->encodinglib(), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -538,6 +690,41 @@ int Package::ByteSize() const {
           this->replicano());
     }
     
+    // optional int32 k = 10;
+    if (has_k()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->k());
+    }
+    
+    // optional int32 m = 11;
+    if (has_m()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->m());
+    }
+    
+    // optional int32 fileSize = 12;
+    if (has_filesize()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->filesize());
+    }
+    
+    // optional int32 bufsize = 13;
+    if (has_bufsize()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->bufsize());
+    }
+    
+    // optional int32 encodingLib = 14;
+    if (has_encodinglib()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->encodinglib());
+    }
+    
   }
   // repeated bytes listItem = 5;
   total_size += 1 * this->listitem_size();
@@ -599,6 +786,21 @@ void Package::MergeFrom(const Package& from) {
     if (from.has_replicano()) {
       set_replicano(from.replicano());
     }
+    if (from.has_k()) {
+      set_k(from.k());
+    }
+    if (from.has_m()) {
+      set_m(from.m());
+    }
+    if (from.has_filesize()) {
+      set_filesize(from.filesize());
+    }
+    if (from.has_bufsize()) {
+      set_bufsize(from.bufsize());
+    }
+    if (from.has_encodinglib()) {
+      set_encodinglib(from.encodinglib());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -631,6 +833,11 @@ void Package::Swap(Package* other) {
     std::swap(mode_, other->mode_);
     std::swap(operation_, other->operation_);
     std::swap(replicano_, other->replicano_);
+    std::swap(k_, other->k_);
+    std::swap(m_, other->m_);
+    std::swap(filesize_, other->filesize_);
+    std::swap(bufsize_, other->bufsize_);
+    std::swap(encodinglib_, other->encodinglib_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
