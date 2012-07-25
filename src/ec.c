@@ -19,7 +19,32 @@
 #include <string.h>
 #include <pthread.h>
 
+ZHTClient_c zhtClient;
+int GPU_CAPABLE;
+
+int ida_init(char* neighbors, char* config){
+
+	//1. Initialize ZHT	
+	c_zht_init_std(&zhtClient, neighbors, config, false); //neighbor zht.cfg false=UDP
+
+	//2. Check GPU Capabilities
+
+	return 0;
+}
+
+int ida_finalize(){
+	
+	//1. Close ZHT
+	c_zht_teardown_std(zhtClient);
+
+	return 0;
+}
+
+
 int ec_init_Library(int libraryId, ecFunctions *ec){
+
+	//TODO this function should take GPU_CAPABLE into consideration
+
 	//This function has to be modified for any library addition
 	switch(libraryId){
 		case GIBRALTAR:
@@ -297,7 +322,51 @@ int ecFileDecode(char *filename) {
 	return EXIT_SUCCESS;
 }
 
-int getLocations(char * filehash, struct comLocations * loc, int minimum){
+int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
+	
+	int blocksNumber = loc->locationsNumber; //blocksNumber is the number of actual data blocks available
+	int i;
+	
+	char chunkname[128];
+	
+	//1. We acquire the locations in ZHT
+	ZHTgetLocations(zhtClient, loc);
+	
+	struct comTransfer * current = loc->transfers;
+
+	int LocationsNumber = loc->locationsNumber;
+
+	if(LocationsNumber < minimum){
+		return 1; //That should be defined as a constant: NOTENOUGHLOCATIONS
+	}
+	
+	blocksNumber = LocationsNumber; //The blocksNumber is maxed by the available Locations number
+
+	//2. We have the destination nodes, we need to attribute blocks to them.
+	for (i = 0; i < blocksNumber; i++) {
+				
+		sprintf(chunkname, "%s.%d", filehash, i);
+		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
+		strcpy(current->distantChunkName,chunkname);
+		
+		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
+		strcpy(current->localChunkName,chunkname);
+		
+		current = current->next;
+	}
+	
+	loc->locationsNumber = blocksNumber; // We actually tell the program how many blocks we can transfer
+	
+	return 0;
+
+}
+
+
+int getRecvLocations(char * filehash, struct comLocations * loc, int minimum){
+	
+	//Read into the metadata
+	
+	/*
 	int n = loc->locationsNumber;
 	int currentLocationsNumber = 0;
 	int i;
@@ -309,6 +378,7 @@ int getLocations(char * filehash, struct comLocations * loc, int minimum){
 	struct comTransfer * current;
 	//1. We acquire the locations [Static Here], Dynamic is TODO
 	//Currently the list implementation makes the most important the LAST one of the list.
+	
 	for (i = 0; i < n; i++) {
 		
 		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
@@ -337,6 +407,7 @@ int getLocations(char * filehash, struct comLocations * loc, int minimum){
 		return 1; //That should be defined as a constant: NOTENOUGHLOCATIONS
 	}
 	loc->locationsNumber = currentLocationsNumber;
+	*/
 	
 	return 0;
 }
@@ -370,20 +441,19 @@ void * threadSendFunc(void * args){
 		return NULL;
 };
 
-int ecFileSend(char *filename, int k, int m) {
+int ecFileSend(char *filename, int k, int m, struct comLocations * loc) {
 	int n = k + m;
 	int i;
 	
-	struct comLocations loc;
 	pthread_t threads[n];
 	
-	loc.locationsNumber = n;
+	loc->locationsNumber = n;
 	
-	getLocations(filename,&loc,n);
+	getSendLocations(filename,loc,n);
 	
-	struct comTransfer * curTransfer = loc.transfers;
+	struct comTransfer * curTransfer = loc->transfers;
 	
-	for (i = 0; i < loc.locationsNumber; i++) {
+	for (i = 0; i < loc->locationsNumber; i++) {
 		// Send the chunks through UDT to the server
 		
 		// TODO: Needs error treatment
@@ -391,11 +461,9 @@ int ecFileSend(char *filename, int k, int m) {
 		curTransfer = curTransfer->next;
 	}
 	
-	for (i = 0; i < loc.locationsNumber; i++) {
+	for (i = 0; i < loc->locationsNumber; i++) {
 		pthread_join(threads[i], NULL);
 	}
-	
-	free_struct_comLocations(&loc);//Free the structure
 	
 	return 0;
 }
@@ -412,20 +480,20 @@ void * threadRecvFunc(void * args){
 		return NULL;
 };
 
-int ecFileReceive(char *filename, int k, int m) {
+int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 	int n = k + m;
 	int i;
 	
-	struct comLocations loc;
+	
 	pthread_t threads[n];
 	
-	loc.locationsNumber = n; 
+	loc->locationsNumber = n; 
 	
-	getLocations(filename,&loc,k); // the minimum we need is k (no worries if we get less locations)
+	getRecvLocations(filename,loc,k); // the minimum we need is k (no worries if we get less locations)
 	
-	struct comTransfer * curTransfer = loc.transfers;
+	struct comTransfer * curTransfer = loc->transfers;
 	
-	for (i = 0; i < loc.locationsNumber; i++) {
+	for (i = 0; i < loc->locationsNumber; i++) {
 		// Send the chunks through UDT to the server
 		
 		// TODO: Needs error treatment
@@ -433,18 +501,14 @@ int ecFileReceive(char *filename, int k, int m) {
 		curTransfer = curTransfer->next;
 	}
 	
-	for (i = 0; i < loc.locationsNumber; i++) {
+	for (i = 0; i < loc->locationsNumber; i++) {
 		pthread_join(threads[i], NULL);
 	}
-	
-	free_struct_comLocations(&loc);//Free the structure
 	
 	return 0;
 }
 
-int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
-	
-	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
+int ecInsertMetadata(struct metadata* meta) {
 	
 	const char* parsedPackage = zht_parse_meta(meta);
 	
@@ -463,7 +527,5 @@ int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
 	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
 	*/
 
-	c_zht_teardown();
-	
 	return 0;
 }

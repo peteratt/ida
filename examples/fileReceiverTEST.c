@@ -19,6 +19,18 @@ int main(int argc, char* argv[]) {
 	int k = 4;
 	int m = 2;
 	
-	ecFileReceive(filename, k, m);
-	return ecFileDecode(filename);
+	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
+	
+	//META here
+	struct comLocations loc;
+	struct metadata* meta;
+	
+	ecFileReceive(filename, k, m, &loc);
+
+	ecFileDecode(filename);
+	
+	free_struct_comLocations(&loc);//Free the structure
+	
+	ida_finalize();
+	return 0;
 }

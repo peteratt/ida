@@ -55,41 +55,48 @@ bidiiter random_unique(bidiiter begin, bidiiter end, size_t num_random) {
     return begin;
 }
 
-int ZHTgetLocations(ZHTClient_c zhtClient, struct comLocations * loc, int n){
-	//This makes a connection to ZHT to get the memberlist and picks n locations to store our files.
+int ZHTgetLocations(ZHTClient_c zhtClient, struct comLocations * loc){
+	//This makes a connection to ZHT to get the memberlist and picks blocksNumber locations to store our files.
 	ZHTClient * zhtcppClient = (ZHTClient *) zhtClient;
 
+	int blocksNumber = loc->locationsNumber;
+	
 	vector<struct HostEntity> potentialLoc(zhtcppClient->memberList); //we need to pick here :) Maybe need to include zht_util to decrypt HostEntity
 
-	if(potentialLoc.size() < n) return 1; //should be NOT ENOUGH LOCATIONS ERROR
+	if(potentialLoc.size() < blocksNumber){
+		loc->locationsNumber = potentialLoc.size();
+	}
 	
 	//This for allows to pick n random different members in the vector ---------
 	//Laziness: http://ideone.com/3A3cv and http://stackoverflow.com/questions/9345087/choose-m-elements-randomly-from-a-vector-containing-n-elements
-	random_unique(potentialLoc.begin(), potentialLoc.end(), n);
+	random_unique(potentialLoc.begin(), potentialLoc.end(), blocksNumber);
     
-    for(int i=0; i<n; ++i) {
+    
+	int currentLocationsNumber = 0;
+	int i;
+	
+	int FFSNETSHIFT = 9000;
+	char chunkname[128];
+	
+	struct comTransfer * prev = NULL;
+	struct comTransfer * current;
+	
+	
+    for(int i=0; i<blocksNumber; ++i) {
         //std::cout << a[i] << '\n';
-        
-        /*
+              
         current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
 	
-		current->hostName = (char *) malloc(strlen("localhost")+1);
-		strcpy(current->hostName,"localhost");
+		current->hostName = (char *) malloc(potentialLoc[i].host.size()+1);
+		strcpy(current->hostName,potentialLoc[i].host.c_str());
 		
-		current->port = FFSNETPORTSTART + i;
+		current->port = potentialLoc[i].port + FFSNETSHIFT;
 		
-		sprintf(chunkname, "%s.%d", filehash, i);
-		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
-		strcpy(current->distantChunkName,chunkname);
-		
-		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
-		strcpy(current->localChunkName,chunkname);
-		
+	
 		currentLocationsNumber++;
 		current->next = prev;
 		prev = current;
-		*/
-        
+
         
     }
 	//---------------------

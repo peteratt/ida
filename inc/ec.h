@@ -43,12 +43,17 @@ struct metadata {
 	int bufsize;
 };
 
+int ida_init(char* neighbors, char* config);
+int ida_finalize();
+
+
 struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId);
 int ecFileDecode(char *filename);
-int ecFileSend(char *filename, int k, int m);
-int ecFileReceive(char *filename, int k, int m);
-int ecInsertMetadata(char *neighbors, char *config, struct metadata* meta);
+int ecFileSend(char *filename, int k, int m, struct comLocations * loc);
+int ecFileReceive(char *filename, int k, int m, struct comLocations * loc);
+int ecInsertMetadata(struct metadata* meta);
 void free_struct_comLocations(struct comLocations * loc);
-int getLocations(char * filehash, struct comLocations * loc, int minimum);
+int getRecvLocations(char * filehash, struct comLocations * loc, int minimum);
+int getSendLocations(char * filehash, struct comLocations * loc, int minimum);
 
 #endif // EC_H_
