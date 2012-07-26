@@ -22,7 +22,6 @@ int main(int argc, char* argv[]) {
 	
 	//META here
 	struct comLocations loc;
-	struct metadata* meta;
 	
 	ecFileReceive(filename, meta->k, meta->m, &loc);
 	free(meta);
