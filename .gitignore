@@ -19,3 +19,8 @@ examples/example
 examples/ffsnet_test_c
 examples/fileDecoder
 examples/fileEncoder
+examples/fileSenderTEST
+examples/fileReceiverTEST
+lib/ZHT/bin/server_zht
+lib/ZHT/bin/c_zhtclient_main
+lib/ZHT/bin/testProtocBuf
