@@ -37,7 +37,7 @@ struct metadata* zht_unparse_meta(const char* text) {
 	
 	struct metadata* meta;
 	
-	meta->filename = package.virtualpath();
+	meta->filename = package.virtualpath().c_str();
 	meta->k = package.k();
 	meta->m = package.m();
 	meta->bufsize = package.bufsize();
