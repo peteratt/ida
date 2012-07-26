@@ -1,0 +1,103 @@
+make bin/ffsnetd
+make[1]: Entering directory `/home/peteratt/Programs/ECwrapper'
+cd lib/ZHT && make
+make[2]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/meta.pb.cpp -o obj/meta.pb.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/net_util.cpp -o obj/net_util.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/novoht.cpp -o obj/novoht.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/zht_util.cpp -o obj/zht_util.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/lru_cache.cpp -o obj/lru_cache.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/cpp_zhtclient.cpp -o obj/cpp_zhtclient.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/c_zhtclient.cpp -o obj/c_zhtclient.o
+ar rus lib/libzht.a obj/*.o 
+#Note that the header files (.h) are required to be included by a client that would alread have the static library libzht
+#Uncomment the next two copy if you removed the zht_util enormous dependencies or the zht_util dependency in cpp_zhtclient. For now, client have to import all the include folder when compiling.
+#cp inc/cpp_zhtclient.h lib/cpp_zhtclient.h
+#cp inc/c_zhtclient.h lib/c_zhtclient.h
+make bin/server_zht
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+make[3]: `bin/server_zht' is up to date.
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+make examples
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  examples/benchmark_client.cpp -o examples/benchmark_client -lzht -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
+gcc -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  examples/c_zhtclient_main.c -o examples/c_zhtclient_main -lzht -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  examples/testProtocBuf.cpp -o examples/testProtocBuf -lzht -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+make[2]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+cp lib/ZHT/lib/libzht.a lib/
+cd lib/udt4 && make -e arch=AMD64 ## Please refer to UDT Readme for compilation
+make[2]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/udt4'
+make -C  src all
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/udt4/src'
+make[3]: Nothing to be done for `all'.
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/udt4/src'
+make -C  app all
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/udt4/app'
+make[3]: Nothing to be done for `all'.
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/udt4/app'
+make[2]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/udt4'
+ar x lib/libjerasure.a;  ar x lib/libgibraltar.a;  ar x lib/libzht.a; 
+mv *.o obj/
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc -c src/ec.c -o obj/c/ec.o
+g++ -lstdc++ -Llib -Iinc -Ilib/udt4/src -c src/ffsnet.cpp -o obj/cpp/ffsnet.o
+g++ -lstdc++ -Llib -Iinc -Ilib/udt4/src -c src/ffsnet_bridger.cpp -o obj/cpp/ffsnet_bridger.o
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc -c src/jerasureCompatibility.c -o obj/c/jerasureCompatibility.o
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc -c src/gibraltarCompatibility.c -o obj/c/gibraltarCompatibility.o
+mv obj/c/*.o obj/
+mv obj/cpp/*.o obj/
+ar rus lib/libecwrapper.a obj/*.o 
+g++ -lstdc++ -Llib -Iinc -Ilib/udt4/src src/ffsnetd.cpp -o bin/ffsnetd -pthread  -lprotobuf -lecwrapper  -L /usr/local/cuda/lib64 -lcudart -lcuda -Llib/udt4/src -ludt
+make[1]: Leaving directory `/home/peteratt/Programs/ECwrapper'
+make examples
+make[1]: Entering directory `/home/peteratt/Programs/ECwrapper'
+cd lib/ZHT && make
+make[2]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/meta.pb.cpp -o obj/meta.pb.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/net_util.cpp -o obj/net_util.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/novoht.cpp -o obj/novoht.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/zht_util.cpp -o obj/zht_util.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/common/lru_cache.cpp -o obj/lru_cache.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/cpp_zhtclient.cpp -o obj/cpp_zhtclient.o
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  -c src/c_zhtclient.cpp -o obj/c_zhtclient.o
+ar rus lib/libzht.a obj/*.o 
+#Note that the header files (.h) are required to be included by a client that would alread have the static library libzht
+#Uncomment the next two copy if you removed the zht_util enormous dependencies or the zht_util dependency in cpp_zhtclient. For now, client have to import all the include folder when compiling.
+#cp inc/cpp_zhtclient.h lib/cpp_zhtclient.h
+#cp inc/c_zhtclient.h lib/c_zhtclient.h
+make bin/server_zht
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+make[3]: `bin/server_zht' is up to date.
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+make examples
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  examples/benchmark_client.cpp -o examples/benchmark_client -lzht -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
+gcc -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  examples/c_zhtclient_main.c -o examples/c_zhtclient_main -lzht -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
+g++ -Xlinker -zmuldefs -Llib -L/usr/local/lib -Iinc -I/usr/local/include/google/protobuf  examples/testProtocBuf.cpp -o examples/testProtocBuf -lzht -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+make[2]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/ZHT'
+cp lib/ZHT/lib/libzht.a lib/
+cd lib/udt4 && make -e arch=AMD64 ## Please refer to UDT Readme for compilation
+make[2]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/udt4'
+make -C  src all
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/udt4/src'
+make[3]: Nothing to be done for `all'.
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/udt4/src'
+make -C  app all
+make[3]: Entering directory `/home/peteratt/Programs/ECwrapper/lib/udt4/app'
+make[3]: Nothing to be done for `all'.
+make[3]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/udt4/app'
+make[2]: Leaving directory `/home/peteratt/Programs/ECwrapper/lib/udt4'
+ar x lib/libjerasure.a;  ar x lib/libgibraltar.a;  ar x lib/libzht.a; 
+mv *.o obj/
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc -c src/ec.c -o obj/c/ec.o
+g++ -lstdc++ -Llib -Iinc -Ilib/udt4/src -c src/ffsnet.cpp -o obj/cpp/ffsnet.o
+g++ -lstdc++ -Llib -Iinc -Ilib/udt4/src -c src/ffsnet_bridger.cpp -o obj/cpp/ffsnet_bridger.o
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc -c src/jerasureCompatibility.c -o obj/c/jerasureCompatibility.o
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc -c src/gibraltarCompatibility.c -o obj/c/gibraltarCompatibility.o
+mv obj/c/*.o obj/
+mv obj/cpp/*.o obj/
+ar rus lib/libecwrapper.a obj/*.o 
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc examples/example.c -o examples/example -pthread  -lprotobuf -lecwrapper  -L /usr/local/cuda/lib64 -lcudart -lcuda -Llib/udt4/src -ludt
+gcc -Wall -Llib -Iinc -g -std=c99 -I/usr/local/include/google/protobuf  -I /usr/local/cuda/include -Ilib/udt4/src -Ilib/ZHT/inc examples/fileEncoder.c -o examples/fileEncoder -pthread  -lprotobuf -lecwrapper  -L /usr/local/cuda/lib64 -lcudart -lcuda -Llib/udt4/src -ludt
+make[1]: Leaving directory `/home/peteratt/Programs/ECwrapper'
