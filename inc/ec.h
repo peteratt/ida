@@ -41,6 +41,7 @@ struct metadata {
 	int encodingLib;
 	long fileSize;
 	int bufsize;
+	struct comLocations* loc;
 };
 
 int ida_init(char* neighbors, char* config);

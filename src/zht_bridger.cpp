@@ -1,12 +1,8 @@
 /**
- * File: ffsnet_bridger.cpp
- * Desc: This is a C wrapper to call the ffsnet library
- * Author: dzhao8@hawk.iit.edu
- * History:
- * 		06/25/2011 - initial development
- *
- * Compile to a shared library:
- *		g++ -fPIC ffsnet_bridger.cpp --shared -o libffsnet_bridger.so -L. -lffsnet
+ * File: zht_bridger.cpp
+ * Desc: This is a C wrapper to call the ZHT Protocol Buffers library
+ * Author: palvare3@hawk.iit.edu
+ * Author: cdebains@hawk.iit.edu
  *
  */
 
@@ -31,16 +27,25 @@ const char* zht_parse_meta(struct metadata* meta) {
 	
 	std::string serialized = package.SerializeAsString();
 	
-	/*
-	Package package2;
-	package2.ParseFromString(serialized);
-	
-	int k = package2.k();
-	*/
-
 	return serialized.c_str();
 }
 
+struct metadata* zht_unparse_meta(const char* text) {
+
+	Package package;
+	package.ParseFromString(serialized);
+	
+	struct metadata* meta;
+	
+	metadata->filename = package.filename();
+	metadata->k = package.k();
+	metadata->m = package.m();
+	metadata->bufsize = package.bufsize();
+	metadata->fileSize = package.filesize();
+	metadata->encodingLib = package.encodinglib();
+	
+	return meta;
+}
 
 template<class bidiiter>
 bidiiter random_unique(bidiiter begin, bidiiter end, size_t num_random) {
