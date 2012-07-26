@@ -16,9 +16,9 @@
 int main(int argc, char* argv[]) {
 	//INPUTS: Filename to Decode
 	char * filename = argv[1];
-	int k = 4;
-	int m = 2;
+	struct metadata* meta = ecLookupMetadata(filename);
 	
-	ecFileReceive(filename, k, m);
+	ecFileReceive(filename, meta->k, meta->m, meta->locations);
+	free(meta);
 	return ecFileDecode(filename);
 }

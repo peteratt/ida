@@ -41,6 +41,7 @@ struct metadata {
 	int encodingLib;
 	long fileSize;
 	int bufsize;
+	struct comLocations* loc;
 };
 
 struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId);

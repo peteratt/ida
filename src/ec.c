@@ -14,7 +14,7 @@
 #include "../inc/ec.h"
 #include "../inc/ffsnet_bridger.h"
 
-#include <c_zhtclient.h>
+#include <c_zhtclientStd.h>
 #include <malloc.h>
 #include <string.h>
 #include <pthread.h>
@@ -442,28 +442,30 @@ int ecFileReceive(char *filename, int k, int m) {
 	return 0;
 }
 
-int ecInsertMetadata(char* neighbors, char* config, struct metadata* meta) {
+int ecInsertMetadata(struct metadata* meta) {
+
+	ZHTClient_c client;
 	
-	c_zht_init(neighbors, config, false); //neighbor zht.cfg false=UDP
+	c_zht_init_std(&client, neighbors, config, false); //neighbor zht.cfg false=UDP
 	
 	const char* parsedPackage = zht_parse_meta(meta);
 	
-	int iret = c_zht_insert("hello");
-
-	//int iret = c_zht_insert(parsedPackage);
+	int iret = c_zht_insert2_std(client, meta->filename, parsedPackage);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
-
-	/*
-	char *result = NULL;
-	int lret = c_zht_lookup2(key, &result);
-	fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
-	fprintf(stderr, "c_zht_lookup, return value: %s\n", result);
-
-	int rret = c_zht_remove2(key);
-	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
-	*/
-
-	c_zht_teardown();
 	
 	return 0;
+}
+
+struct metadata* ecLookupMetadata(char* key) {
+
+	ZHTClient_c client;
+	
+	c_zht_init_std(&client, neighbors, config, false); //neighbor zht.cfg false=UDP
+
+	char *result;
+	int lret = c_zht_lookup2(key, &result);
+	
+	struct metadata* lookedup = zht_unparse_meta(result);
+	
+	return lookedup;
 }
