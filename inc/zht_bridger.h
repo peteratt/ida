@@ -7,6 +7,7 @@ extern "C" {
   
 const char* zht_parse_meta(struct metadata* meta);
 int ZHTgetLocations(ZHTClient_c zhtClient, struct comLocations * loc);
+struct metadata* zht_unparse_meta(const char* text);
 
 #ifdef __cplusplus
 }
