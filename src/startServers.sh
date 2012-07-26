@@ -50,7 +50,7 @@ mkdir $TESTINGFOLDER
 for ((i = 0; i < $NUMSERVERS; i++)); do
 	mkdir $TESTINGFOLDER/serv$i
 	cd $TESTINGFOLDER/serv$i
-	port=$(($i+9001))	
+	port=$(($i+59001))	
 	$FFSNETSERVER $port &
 	echo $! >> $BACKFROMTESTING$PIDFILE
 	cd $BACKFROMTESTING

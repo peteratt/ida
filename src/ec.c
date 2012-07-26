@@ -327,7 +327,7 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 	int blocksNumber = loc->locationsNumber; //blocksNumber is the number of actual data blocks available
 	int i;
 	
-	char chunkname[128];
+	char chunkname[256];
 	
 	//1. We acquire the locations in ZHT
 	ZHTgetLocations(zhtClient, loc);
