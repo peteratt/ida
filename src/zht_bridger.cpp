@@ -33,16 +33,16 @@ const char* zht_parse_meta(struct metadata* meta) {
 struct metadata* zht_unparse_meta(const char* text) {
 
 	Package package;
-	package.ParseFromString(serialized);
+	package.ParseFromString(text);
 	
 	struct metadata* meta;
 	
-	metadata->filename = package.filename();
-	metadata->k = package.k();
-	metadata->m = package.m();
-	metadata->bufsize = package.bufsize();
-	metadata->fileSize = package.filesize();
-	metadata->encodingLib = package.encodinglib();
+	meta->filename = package.filename();
+	meta->k = package.k();
+	meta->m = package.m();
+	meta->bufsize = package.bufsize();
+	meta->fileSize = package.filesize();
+	meta->encodingLib = package.encodinglib();
 	
 	return meta;
 }
