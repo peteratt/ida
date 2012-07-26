@@ -15,7 +15,7 @@ LFLAGS=-pthread # -lpthread does not work whereas -pthread does. This may be the
 
 LFLAGS+=-lecwrapper #Well...this is our library!
 
-PROTOBUF_HOME=/usr/local/include/google/protobuf #your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
+PROTOBUF_HOME=/usr/local/include/google/protobuf#your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
 CFLAGS+=-I$(PROTOBUF_HOME)
 LFLAGS+=-lprotobuf
 
@@ -32,7 +32,7 @@ all:
 #######################################################
 #Jerasure-1.2
 OBJECTS+=obj/c/jerasureCompatibility.o
-LIBS+=libjerasure.a
+LIBSEc+=lib/libjerasure.a
 
 lib/libjerasure.a: 
 	cd lib/Jerasure-1.2 && make
@@ -40,7 +40,7 @@ lib/libjerasure.a:
 
 #######################################################
 #Gibraltar (CUDA)
-
+ifneq ($(nogpu),1)
 CUDAINC=-I $(CUDA_INC_PATH)
 CUDALIB=-L $(CUDA_LIB_PATH)
 
@@ -49,12 +49,15 @@ LFLAGS+=$(CUDALIB)
  
 LFLAGS+=-lcudart -lcuda
 OBJECTS+=obj/c/gibraltarCompatibility.o
-LIBS+=libgibraltar.a
+OBJECTS+=obj/c/cudaCheck.o
+LIBSEc+=lib/libgibraltar.a
 
 lib/libgibraltar.a:  
 	cd lib/libgibraltar-1.0 && make cuda=1
 	ar rus lib/libgibraltar.a lib/libgibraltar-1.0/obj/*.o
-
+else
+CFLAGS+=-D IDA_NOGPU
+endif
 #######################################################
 #UDT (required by FFSNET)
 UDTLOC=lib/udt4
@@ -69,16 +72,19 @@ libudt:
 ###ZHT Library Compilation and import
 #LFLAGS+=-lzht
 CFLAGS+=-Ilib/ZHT/inc
-LIBS+=libzht.a
+LIBS+=lib/libzht.a
 
 zht: lib/ZHT/Makefile
 	cd lib/ZHT && make
 	cp lib/ZHT/lib/libzht.a lib/
 
 ######################################################
+LIBS+=$(LIBSEc)
+
+
+
 
 examples: lib/libecwrapper.a
-	$(CC) $(CFLAGS) examples/example.c -o examples/example $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileSenderTEST.c -o examples/fileSenderTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileReceiverTEST.c -o examples/fileReceiverTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
@@ -92,25 +98,24 @@ lib/libecwrapper.a: obj libs $(OBJECTS)
 	ar rus lib/libecwrapper.a obj/*.o 
 
 # If you don't have CUDA, remove lib/libgibraltar.a
-libs: lib/libgibraltar.a lib/libjerasure.a zht libudt
-	$(foreach var,$(LIBS),ar x lib/$(var); )
+libs: $(LIBSEc) zht libudt
+	$(foreach var,$(LIBS),ar x $(var); )
 	mv *.o obj/
 
 obj:
 	mkdir -p obj
-	mkdir -p obj/c
-	mkdir -p obj/cpp
+	mkdir -p obj/c/
+	mkdir -p obj/cpp/
 
-obj/cpp/%.o: src/%.cpp obj
+obj/cpp/%.o: obj src/%.cpp
 	$(CXX) $(CPPFLAGS) -c src/$*.cpp -o obj/cpp/$*.o
 	
-obj/c/%.o: src/%.c obj
+obj/c/%.o: obj src/%.c
 	$(CC) $(CFLAGS) -c src/$*.c -o obj/c/$*.o
 
 
 clean:
 	rm -rf obj
-	rm -f examples/example
 	rm -f examples/ffsnet_test_c
 
 mrproper: clean

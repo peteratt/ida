@@ -14,5 +14,5 @@
 //Defaults Parameters
 #define DEFAULT_K 4
 #define DEFAULT_M 2
-#define DEFAULT_ECLIBRARY 0
+#define DEFAULT_ECLIBRARY 1 //DO NOT SET TO A GPU LIBRARY!!
 #define DEFAULT_BUFSIZE 1024

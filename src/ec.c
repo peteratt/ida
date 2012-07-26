@@ -14,10 +14,22 @@
 #include "../inc/ec.h"
 #include "../inc/ffsnet_bridger.h"
 
+//GPU vs NOGPU -------
+#ifndef IDA_NOGPU
+	#include "../inc/cudaCheck.h"
+	#define CUDA_CHECK() CUDACapableCheck()
+	#define EC_GPULIB_INIT(x) ec_init_Gibraltar(x)
+#else
+	#define CUDA_CHECK() 1
+	#define EC_GPULIB_INIT(x) ec_init_Library(1, x)
+#endif
+//GPU vs NOGPU -------
+
 #include <c_zhtclientStd.h>
 #include <malloc.h>
 #include <string.h>
 #include <pthread.h>
+
 
 ZHTClient_c zhtClient;
 int GPU_CAPABLE;
@@ -28,6 +40,7 @@ int ida_init(char* neighbors, char* config){
 	c_zht_init_std(&zhtClient, neighbors, config, false); //neighbor zht.cfg false=UDP
 
 	//2. Check GPU Capabilities
+	GPU_CAPABLE = CUDA_CHECK();
 
 	return 0;
 }
@@ -48,7 +61,13 @@ int ec_init_Library(int libraryId, ecFunctions *ec){
 	//This function has to be modified for any library addition
 	switch(libraryId){
 		case GIBRALTAR:
-			ec_init_Gibraltar(ec);
+			if(GPU_CAPABLE){
+				EC_GPULIB_INIT(ec);
+			}
+			else{
+				ec_init_JerasureRS(ec);
+				return 2;//SHOULD BE DEFAULT LIBRARY ERROR
+			}
 			break;
 		case JERASURERS:
 			ec_init_JerasureRS(ec);
@@ -211,8 +230,9 @@ int ecFileDecode(char *filename) {
     ecContext context;
 
 	//TODO WE NEED THE LIBRARY HERE
-	//ec_init_Library(libraryId, &ec);
-	ec_init_Gibraltar(&ec); //If Gibraltar
+	int libraryId = 0;
+	ec_init_Library(libraryId, &ec);
+	//ec_init_Gibraltar(&ec); //If Gibraltar
 	//ec_init_JerasureRS(&ec); //if Jerasure Reed Solomon
 	
 	int rc = ec->init(n, m, &context);

@@ -43,6 +43,8 @@ lib/libzht.a: $(OBJECTS) clients
 
 obj:
 	mkdir -p obj
+	mkdir -p obj/cpp
+	mkdir -p obj/c
 
 clients: src/cpp_zhtclient.cpp src/c_zhtclient.cpp
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/cpp_zhtclient.cpp -o obj/cpp_zhtclient.o
@@ -50,7 +52,7 @@ clients: src/cpp_zhtclient.cpp src/c_zhtclient.cpp
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/c_zhtclient.cpp -o obj/c_zhtclient.o
 
 
-obj/%.o: src/common/%.cpp obj
+obj/%.o: obj src/common/%.cpp
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/common/$*.cpp -o obj/$*.o
 
 gProto: src/misc/meta.proto
