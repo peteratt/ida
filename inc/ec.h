@@ -35,7 +35,7 @@ struct comTransfer {
 };
 
 struct metadata {
-	char *filename;
+	const char *filename;
 	int k;
 	int m;
 	int encodingLib;
