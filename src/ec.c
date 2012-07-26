@@ -328,7 +328,7 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 	int i;
 	
 	char chunkname[256];
-	
+	unsigned int chunknameLen;
 	//1. We acquire the locations in ZHT
 	ZHTgetLocations(zhtClient, loc);
 	
@@ -345,11 +345,11 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 	//2. We have the destination nodes, we need to attribute blocks to them.
 	for (i = 0; i < blocksNumber; i++) {
 				
-		sprintf(chunkname, "%s.%d", filehash, i);
-		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
+		chunknameLen = sprintf(chunkname, "%s.%d", filehash, i);
+		current->distantChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->distantChunkName,chunkname);
 		
-		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
+		current->localChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->localChunkName,chunkname);
 		
 		current = current->next;

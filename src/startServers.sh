@@ -34,7 +34,7 @@ fi
 >$PIDFILE
 
 for ((i = 0; i < $NUMSERVERS; i++)); do
-	port=$(($i+50001))
+	port=$(($i+50000))
 	echo "localhost $port" >> $ZHTNEIGHBORFILE
 done
 
@@ -50,12 +50,12 @@ mkdir $TESTINGFOLDER
 for ((i = 0; i < $NUMSERVERS; i++)); do
 	mkdir $TESTINGFOLDER/serv$i
 	cd $TESTINGFOLDER/serv$i
-	port=$(($i+59001))	
+	port=$(($i+59000))	
 	$FFSNETSERVER $port &
 	echo $! >> $BACKFROMTESTING$PIDFILE
 	cd $BACKFROMTESTING
 	
-	port=$(($i+50001))
+	port=$(($i+50000))
 	$ZHTSERVER $port $ZHTNEIGHBORFILE $ZHTCONFIG "UDP" &
 	echo $! >> $PIDFILE
 done

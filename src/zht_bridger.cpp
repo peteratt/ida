@@ -81,7 +81,6 @@ int ZHTgetLocations(ZHTClient_c zhtClient, struct comLocations * loc){
 	int i;
 	
 	int FFSNETSHIFT = 9000;
-	char chunkname[128];
 	
 	struct comTransfer * prev = NULL;
 	struct comTransfer * current;
@@ -104,7 +103,7 @@ int ZHTgetLocations(ZHTClient_c zhtClient, struct comLocations * loc){
 
         
     }
-	//---------------------
+	loc->transfers = current;
 
 	return 0;
 }

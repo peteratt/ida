@@ -28,16 +28,14 @@ int main(int argc, char* argv[]) {
 	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
 
 	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,GIBRALTAR);
-	printf("caca1");
 	
 	struct comLocations loc;
 	ecFileSend(filename, k, m, &loc);
-	printf("caca2");
 	
 	ecInsertMetadata(meta);
-	printf("caca3");
+
 	free(meta);
-	printf("caca4");
+
 	free_struct_comLocations(&loc);//Free the structure
 	
 	ida_finalize();
