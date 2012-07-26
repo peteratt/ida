@@ -24,9 +24,22 @@ int main(int argc, char* argv[]) {
 	int m = atoi(argv[3]);
 	int bufsize = atoi(argv[4]);
 
+
+	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
+
 	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,GIBRALTAR);
-	ecInsertMetadata("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg", meta);
+	
+	
+	struct comLocations loc;
+	ecFileSend(filename, k, m, &loc);
+	
+	
+	ecInsertMetadata(meta);
 	free(meta);
 	
-	return ecFileSend(filename, k, m);
+	free_struct_comLocations(&loc);//Free the structure
+	
+	ida_finalize();
+	
+	return 0;
 }

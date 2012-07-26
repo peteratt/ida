@@ -18,7 +18,19 @@ int main(int argc, char* argv[]) {
 	char * filename = argv[1];
 	struct metadata* meta = ecLookupMetadata(filename);
 	
-	ecFileReceive(filename, meta->k, meta->m, meta->locations);
+	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
+	
+	//META here
+	struct comLocations loc;
+	struct metadata* meta;
+	
+	ecFileReceive(filename, meta->k, meta->m, &loc);
 	free(meta);
-	return ecFileDecode(filename);
+
+	ecFileDecode(filename);
+	
+	free_struct_comLocations(&loc);//Free the structure
+	
+	ida_finalize();
+	return 0;
 }
