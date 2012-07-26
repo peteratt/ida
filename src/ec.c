@@ -512,7 +512,7 @@ int ecInsertMetadata(struct metadata* meta) {
 	
 	const char* parsedPackage = zht_parse_meta(meta);
 	
-	int iret = c_zht_insert2_std(client, meta->filename, parsedPackage);
+	int iret = c_zht_insert2_std(zhtClient, meta->filename, parsedPackage);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
 	
 	return 0;
@@ -521,7 +521,8 @@ int ecInsertMetadata(struct metadata* meta) {
 struct metadata* ecLookupMetadata(char* key) {
 
 	char *result;
-	int lret = c_zht_lookup2(key, &result);
+	size_t n;
+	int lret = c_zht_lookup2_std(zhtClient, key, &result, &n);
 	
 	struct metadata* lookedup = zht_unparse_meta(result);
 	
