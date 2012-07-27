@@ -27,17 +27,17 @@ int main(int argc, char* argv[]) {
 
 	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
 
-	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,GIBRALTAR);
+	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,JERASURERS);
 	
-	struct comLocations loc;
-	ecFileSend(filename, k, m, &loc);
+	meta->loc = (struct comLocations *) malloc(sizeof(struct comLocations));
+	ecFileSend(filename, k, m, meta->loc);
 	
 	ecInsertMetadata(meta);
 
+	free_struct_comLocations(meta->loc);//Free the structure
+	free(meta->loc);
 	free(meta);
 
-	free_struct_comLocations(&loc);//Free the structure
-	
 	ida_finalize();
 	
 	return 0;

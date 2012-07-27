@@ -169,7 +169,6 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	meta->k = k;
 	meta->m = m;
 	//Type of encoding
-	//TODO
 	meta->encodingLib = libraryId;
 	
 	//Buffer size
@@ -556,6 +555,7 @@ int ecInsertMetadata(struct metadata* meta) {
 struct metadata* ecLookupMetadata(char* key) {
 
 	char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
+
 	
 	if (result != NULL) {
 		int lret = c_zht_lookup2_std(zhtClient, key, result);
