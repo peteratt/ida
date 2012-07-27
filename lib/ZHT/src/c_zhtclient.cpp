@@ -23,9 +23,9 @@ int c_zht_lookup(const char *pair, char *result) {
 	return c_zht_lookup_std(zhtClient, pair, result);
 }
 
-int c_zht_lookup2(const char *key, char *result, size_t *n) {
+int c_zht_lookup2(const char *key, char *result) {
 
-	return c_zht_lookup2_std(zhtClient, key, result, n);
+	return c_zht_lookup2_std(zhtClient, key, result);
 }
 
 int c_zht_remove(const char *pair) {
