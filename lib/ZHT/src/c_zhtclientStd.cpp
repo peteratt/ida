@@ -127,11 +127,13 @@ int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result) {
 
 	Package package;
 	package.set_virtualpath(keyStr); //as key
-	package.set_isdir(true);
+	package.set_isdir(false);
 	package.set_replicano(5);
 	package.set_operation(1); //1 for look up, 2 for remove, 3 for insert
+	
+	string request = package.SerializeAsString();
 
-	int ret = zhtcppClient->lookup(package.SerializeAsString(), resultStr);
+	int ret = zhtcppClient->lookup(request, resultStr);
 
 	Package package2;
 	package2.ParseFromString(resultStr);
