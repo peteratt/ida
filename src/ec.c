@@ -536,6 +536,19 @@ int ecInsertMetadata(struct metadata* meta) {
 	int iret = c_zht_insert2_std(zhtClient, meta->filename, parsedPackage);
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
 	
+	// TESTING
+	char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
+	
+	if (result != NULL) {
+		int lret = c_zht_lookup2_std(zhtClient, meta->filename, result);
+		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
+		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
+	}
+	
+	struct metadata* lookedup = zht_unparse_meta(result);
+	free(result);
+	// END TESTING
+	
 	return 0;
 }
 
