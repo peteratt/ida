@@ -561,11 +561,10 @@ int ecInsertMetadata(struct metadata* meta) {
 struct metadata* ecLookupMetadata(char* key) {
 
 	char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
-
 	
 	if (result != NULL) {
 		size_t n;
-		int lret = c_zht_lookup2_std(zhtClient, meta->filename, result, &n);
+		int lret = c_zht_lookup2_std(zhtClient, key, result, &n);
 		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
 		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
 		//int lret2 = c_zht_lookup2_std(zhtClient, "hello", result, &n);

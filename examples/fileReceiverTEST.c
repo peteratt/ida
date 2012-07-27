@@ -21,8 +21,6 @@ int main(int argc, char* argv[]) {
 	
 	struct metadata* meta = ecLookupMetadata(filename);
 	
-
-	
 	ecFileReceive(filename, meta->k, meta->m, meta->loc);
 
 	ecFileDecode(filename);
