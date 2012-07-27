@@ -59,19 +59,6 @@ int c_zht_insert_std(ZHTClient_c zhtClient, const char *pair) {
 	ZHTClient * zhtcppClient = (ZHTClient *) zhtClient;
 
 	string str(pair);
-	string keyStr = str;
-	string valueStr = str;
-	
-	if (keyStr.empty()) //empty key not allowed.
-		return -1;
-
-	Package package;
-	package.set_virtualpath(keyStr); //as key
-	package.set_isdir(true);
-	package.set_replicano(5);
-	package.set_operation(3); //1 for look up, 2 for remove, 3 for insert
-	if (!valueStr.empty())
-		package.set_realfullpath(valueStr);
 
 	return zhtcppClient->insert(str);
 }
@@ -115,8 +102,8 @@ int c_zht_lookup_std(ZHTClient_c zhtClient, const char *pair, char *result) {
 	return ret;
 }
 
-int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result) {
-	
+int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result, size_t *n) {
+
 	ZHTClient * zhtcppClient = (ZHTClient *) zhtClient;
 
 	string keyStr(key);
@@ -136,8 +123,10 @@ int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result) {
 	Package package2;
 	package2.ParseFromString(resultStr);
 	string strRealfullpath = package2.realfullpath();
-	strncpy(result, strRealfullpath.c_str(), strlen(result));
-	//*n = strRealfullpath.size();
+	//const char * buffer = (char *) malloc(strlen(result)*sizeof(char)+1);
+	const char* buffer = strRealfullpath.c_str();
+	strncpy(result, buffer, strlen(buffer));
+	*n = strRealfullpath.size();
 
 	return ret;
 }

@@ -35,7 +35,7 @@ struct metadata* zht_unparse_meta(const char* text) {
 	Package package;
 	package.ParseFromString(text);
 	
-	struct metadata* meta;
+	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
 	
 	meta->filename = package.virtualpath().c_str();
 	meta->k = package.k();

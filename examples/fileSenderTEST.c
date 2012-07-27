@@ -32,9 +32,9 @@ int main(int argc, char* argv[]) {
 	struct comLocations loc;
 	ecFileSend(filename, k, m, &loc);
 	
+	printf("Reaches here 1\n");
 	ecInsertMetadata(meta);
-
-	free(meta);
+	printf("Reaches here 2\n");
 
 	free_struct_comLocations(&loc);//Free the structure
 	

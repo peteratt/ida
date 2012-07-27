@@ -44,11 +44,12 @@ int main(int argc, char **argv) {
 	size_t n;
 	char *result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
 	if (result != NULL) {
-		int lret = c_zht_lookup2_std(zhtClient, key, result);
+		int lret = c_zht_lookup2_std(zhtClient, key, result, &n);
 		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
-		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
+		fprintf(stderr, "c_zht_lookup, return value: length(%lu), %s\n", n,
+				result);
 	}
-	free(result);
+	//free(result);
 
 	int rret = c_zht_remove2_std(zhtClient, key);
 	fprintf(stderr, "c_zht_remove, return code: %d\n", rret);
