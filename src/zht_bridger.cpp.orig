@@ -30,25 +30,27 @@ const char* zht_parse_meta(struct metadata* meta) {
 	return serialized.c_str();
 }
 
-<<<<<<< HEAD
 struct metadata* zht_unparse_meta(const char* text) {
 
 	Package package;
-	package.ParseFromString(serialized);
+	package.ParseFromString(text);
 	
+<<<<<<< HEAD
 	struct metadata* meta;
+	meta->loc = (struct comLocations *) malloc(sizeof(struct comLocations));
+=======
+	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
+>>>>>>> 4cb6fb3a0c4b5985e74356ee118f1b52f22f35ed
 	
-	metadata->filename = package.filename();
-	metadata->k = package.k();
-	metadata->m = package.m();
-	metadata->bufsize = package.bufsize();
-	metadata->fileSize = package.filesize();
-	metadata->encodingLib = package.encodinglib();
+	meta->filename = package.virtualpath().c_str();
+	meta->k = package.k();
+	meta->m = package.m();
+	meta->bufsize = package.bufsize();
+	meta->fileSize = package.filesize();
+	meta->encodingLib = package.encodinglib();
 	
 	return meta;
 }
-
-=======
 
 template<class bidiiter>
 bidiiter random_unique(bidiiter begin, bidiiter end, size_t num_random) {
@@ -84,7 +86,6 @@ int ZHTgetLocations(ZHTClient_c zhtClient, struct comLocations * loc){
 	int i;
 	
 	int FFSNETSHIFT = 9000;
-	char chunkname[128];
 	
 	struct comTransfer * prev = NULL;
 	struct comTransfer * current;
@@ -107,8 +108,7 @@ int ZHTgetLocations(ZHTClient_c zhtClient, struct comLocations * loc){
 
         
     }
-	//---------------------
+	loc->transfers = current;
 
 	return 0;
 }
->>>>>>> 4801ffd884e84ca1c7bb81a61d69b95e7a51cd43

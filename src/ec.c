@@ -533,20 +533,26 @@ int ecInsertMetadata(struct metadata* meta) {
 	const char* parsedPackage = zht_parse_meta(meta);
 	
 	int iret = c_zht_insert2_std(zhtClient, meta->filename, parsedPackage);
+	//int iret2 = c_zht_insert2_std(zhtClient, "hello", "zht");
 	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
+	//fprintf(stderr, "c_zht_insert, return code: %d\n", iret2);
 	
 	// TESTING
-	char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
+	/*char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
 	
 	if (result != NULL) {
-		int lret = c_zht_lookup2_std(zhtClient, meta->filename, result);
+		size_t n;
+		int lret = c_zht_lookup2_std(zhtClient, meta->filename, result, &n);
 		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
 		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
+		//int lret2 = c_zht_lookup2_std(zhtClient, "hello", result, &n);
+		//fprintf(stderr, "c_zht_lookup, return code: %d\n", lret2);
+		//fprintf(stderr, "c_zht_lookup, return value, %s and size: %lu\n", result, n);
 	}
 	
 	struct metadata* lookedup = zht_unparse_meta(result);
 	fprintf(stderr, "Filename retrieved: %s\n",	lookedup->filename);
-	free(result);
+	free(result);*/
 	// END TESTING
 	
 	return 0;
@@ -558,12 +564,18 @@ struct metadata* ecLookupMetadata(char* key) {
 
 	
 	if (result != NULL) {
-		int lret = c_zht_lookup2_std(zhtClient, key, result);
+		size_t n;
+		int lret = c_zht_lookup2_std(zhtClient, meta->filename, result, &n);
 		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
 		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
+		//int lret2 = c_zht_lookup2_std(zhtClient, "hello", result, &n);
+		//fprintf(stderr, "c_zht_lookup, return code: %d\n", lret2);
+		//fprintf(stderr, "c_zht_lookup, return value, %s and size: %lu\n", result, n);
 	}
 	
 	struct metadata* lookedup = zht_unparse_meta(result);
+	fprintf(stderr, "Filename retrieved: %s\n",	lookedup->filename);
 	free(result);
+
 	return lookedup;
 }
