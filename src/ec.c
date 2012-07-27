@@ -541,8 +541,8 @@ int ecInsertMetadata(struct metadata* meta) {
 struct metadata* ecLookupMetadata(char* key) {
 
 	char *result;
-	size_t n;
-	int lret = c_zht_lookup2_std(zhtClient, key, &result, &n);
+	size_t *n;
+	c_zht_lookup2_std(zhtClient, key, &result, n);
 	
 	struct metadata* lookedup = zht_unparse_meta(result);
 	
