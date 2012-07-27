@@ -540,10 +540,15 @@ int ecInsertMetadata(struct metadata* meta) {
 
 struct metadata* ecLookupMetadata(char* key) {
 
-	char *result;
-	c_zht_lookup2_std(zhtClient, key, result);
+	char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
+	
+	if (result != NULL) {
+		int lret = c_zht_lookup2_std(zhtClient, key, result);
+		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
+		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
+	}
 	
 	struct metadata* lookedup = zht_unparse_meta(result);
-	
+	free(result);
 	return lookedup;
 }

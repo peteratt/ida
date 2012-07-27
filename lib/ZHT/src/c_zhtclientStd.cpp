@@ -116,7 +116,7 @@ int c_zht_lookup_std(ZHTClient_c zhtClient, const char *pair, char *result) {
 }
 
 int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result) {
-
+	
 	ZHTClient * zhtcppClient = (ZHTClient *) zhtClient;
 
 	string keyStr(key);
@@ -127,18 +127,17 @@ int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result) {
 
 	Package package;
 	package.set_virtualpath(keyStr); //as key
-	package.set_isdir(false);
+	package.set_isdir(true);
 	package.set_replicano(5);
 	package.set_operation(1); //1 for look up, 2 for remove, 3 for insert
-	
-	string request = package.SerializeAsString();
 
-	int ret = zhtcppClient->lookup(request, resultStr);
+	int ret = zhtcppClient->lookup(package.SerializeAsString(), resultStr);
 
 	Package package2;
 	package2.ParseFromString(resultStr);
 	string strRealfullpath = package2.realfullpath();
 	strncpy(result, strRealfullpath.c_str(), strlen(result));
+	*n = strRealfullpath.size();
 
 	return ret;
 }
