@@ -115,7 +115,7 @@ int c_zht_lookup_std(ZHTClient_c zhtClient, const char *pair, char *result) {
 	return ret;
 }
 
-int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result, size_t *n) {
+int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result) {
 
 	ZHTClient * zhtcppClient = (ZHTClient *) zhtClient;
 
@@ -137,7 +137,6 @@ int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result, size
 	package2.ParseFromString(resultStr);
 	string strRealfullpath = package2.realfullpath();
 	strncpy(result, strRealfullpath.c_str(), strlen(result));
-	*n = strRealfullpath.size();
 
 	return ret;
 }
