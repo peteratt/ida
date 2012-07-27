@@ -546,6 +546,7 @@ int ecInsertMetadata(struct metadata* meta) {
 	}
 	
 	struct metadata* lookedup = zht_unparse_meta(result);
+	fprintf(stderr, "Filename retrieved: %s\n",	lookedup->filename);
 	free(result);
 	// END TESTING
 	
