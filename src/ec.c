@@ -33,6 +33,7 @@
 
 ZHTClient_c zhtClient;
 int GPU_CAPABLE;
+const int LOOKUP_SIZE = 65535;
 
 int ida_init(char* neighbors, char* config){
 
