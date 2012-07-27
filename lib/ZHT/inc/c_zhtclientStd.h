@@ -57,7 +57,7 @@ ZHT_CPP(extern "C" {)
 	 * N: actual number of characters read.
 	 * return code: 0 if succeeded, or -1 if empty key, or , -98 if unrecognized operation
 	 * */
-	int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result, size_t *n);
+	int c_zht_lookup2_std(ZHTClient_c zhtClient, const char *key, char *result);
 
 	/* wrapp C++ ZHTClient::remove.
 	 * PAIR is expected to be a serializationg string with protocol-buffer-c-binding representation.
