@@ -188,12 +188,13 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	return meta;
 }
 
-int ecFileDecode(char *filename) {
+int ecFileDecode(char *filename, struct metadata * meta) {
 	//INPUTS: Filename to Decode
 	char filenameDest[260];	
-	int bufsize,n,m,filesize,ngood,nbad,j,i,unfinished,nBytes,tmp, towrite;
+	int bufsize,n,m,filesize,ngood,nbad,j,i,unfinished,nBytes,tmp, towrite, libraryId;
 
-	/* Load information from metaFile */
+	/*
+	// Load information from metaFile
 	FILE *sourceMeta;
 	char loadedInfo[260];
 
@@ -222,18 +223,20 @@ int ecFileDecode(char *filename) {
 	//Read bufsize
 	fscanf(sourceMeta,"%i\n",&bufsize);
 	printf("%i\n",bufsize);
-
+	*/
+	
+	filesize = meta->fileSize;
+	n = meta->k;
+	m = meta->m;
+	bufsize = meta->bufsize;
+	libraryId = meta->encodingLib;
 
 
 	/* Initialize Ec Functions and Context */
 	ecFunctions ec;
     ecContext context;
 
-	//TODO WE NEED THE LIBRARY HERE
-	int libraryId = 0;
 	ec_init_Library(libraryId, &ec);
-	//ec_init_Gibraltar(&ec); //If Gibraltar
-	//ec_init_JerasureRS(&ec); //if Jerasure Reed Solomon
 	
 	int rc = ec->init(n, m, &context);
 	if (rc) {
@@ -329,7 +332,7 @@ int ecFileDecode(char *filename) {
 	}
 	
 	/* Close files */
-	fclose(sourceMeta);
+	//fclose(sourceMeta);
 	fclose(destination);
 	for (j = 0; j < ngood; j++) {
 		fclose(source[goodBufIds[j]]);
@@ -384,50 +387,7 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 
 int getRecvLocations(char * filehash, struct comLocations * loc, int minimum){
 	
-	//Read into the metadata
-	
-	/*
-	int n = loc->locationsNumber;
-	int currentLocationsNumber = 0;
-	int i;
-	
-	int FFSNETPORTSTART = 9001;
-	char chunkname[128];
-	
-	struct comTransfer * prev = NULL;
-	struct comTransfer * current;
-	//1. We acquire the locations [Static Here], Dynamic is TODO
-	//Currently the list implementation makes the most important the LAST one of the list.
-	
-	for (i = 0; i < n; i++) {
-		
-		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
-	
-		current->hostName = (char *) malloc(strlen("localhost")+1);
-		strcpy(current->hostName,"localhost");
-		
-		current->port = FFSNETPORTSTART + i;
-		
-		sprintf(chunkname, "%s.%d", filehash, i);
-		current->distantChunkName = (char *) malloc(strlen(chunkname)+1);
-		strcpy(current->distantChunkName,chunkname);
-		
-		current->localChunkName = (char *) malloc(strlen(chunkname)+1);
-		strcpy(current->localChunkName,chunkname);
-		
-		currentLocationsNumber++;
-		current->next = prev;
-		prev = current;
-	}
-	
-	loc->transfers = prev;
-	
-	//2. We check that locations are enough to reconstruct the file. If not, exit. If yes, adjust the actual number of locations that we return. (should be between minimum and the original locationsNumber)
-	if(currentLocationsNumber < minimum){
-		return 1; //That should be defined as a constant: NOTENOUGHLOCATIONS
-	}
-	loc->locationsNumber = currentLocationsNumber;
-	*/
+	//TODO This function should check if the files are available.
 	
 	return 0;
 }
@@ -530,51 +490,12 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 
 int ecInsertMetadata(struct metadata* meta) {
 	
-	const char* parsedPackage = zht_parse_meta(meta);
-	
-	int iret = c_zht_insert2_std(zhtClient, meta->filename, parsedPackage);
-	//int iret2 = c_zht_insert2_std(zhtClient, "hello", "zht");
-	fprintf(stderr, "c_zht_insert, return code: %d\n", iret);
-	//fprintf(stderr, "c_zht_insert, return code: %d\n", iret2);
-	
-	// TESTING
-	/*char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
-	
-	if (result != NULL) {
-		size_t n;
-		int lret = c_zht_lookup2_std(zhtClient, meta->filename, result, &n);
-		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
-		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
-		//int lret2 = c_zht_lookup2_std(zhtClient, "hello", result, &n);
-		//fprintf(stderr, "c_zht_lookup, return code: %d\n", lret2);
-		//fprintf(stderr, "c_zht_lookup, return value, %s and size: %lu\n", result, n);
-	}
-	
-	struct metadata* lookedup = zht_unparse_meta(result);
-	fprintf(stderr, "Filename retrieved: %s\n",	lookedup->filename);
-	free(result);*/
-	// END TESTING
-	
-	return 0;
+	return zht_insert_meta(zhtClient, meta);
 }
 
 struct metadata* ecLookupMetadata(char* key) {
 
-	char* result = (char*) calloc(LOOKUP_SIZE, sizeof(char));
+	struct metadata * meta = zht_lookup_meta(zhtClient,key);
 	
-	if (result != NULL) {
-		size_t n;
-		int lret = c_zht_lookup2_std(zhtClient, key, result, &n);
-		fprintf(stderr, "c_zht_lookup, return code: %d\n", lret);
-		fprintf(stderr, "c_zht_lookup, return value, %s\n",	result);
-		//int lret2 = c_zht_lookup2_std(zhtClient, "hello", result, &n);
-		//fprintf(stderr, "c_zht_lookup, return code: %d\n", lret2);
-		//fprintf(stderr, "c_zht_lookup, return value, %s and size: %lu\n", result, n);
-	}
-	
-	struct metadata* lookedup = zht_unparse_meta(result);
-	fprintf(stderr, "Filename retrieved: %s\n",	lookedup->filename);
-	free(result);
-
-	return lookedup;
+	return meta;
 }

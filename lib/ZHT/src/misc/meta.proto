@@ -19,4 +19,12 @@ message Package{
 	optional int32 fileSize = 12;
 	optional int32 bufsize = 13;
 	optional int32 encodingLib = 14;
+	
+	message Location{
+		required string hostname = 1;
+		optional int32 port = 2;
+		required string distantChunkName = 3;
+		required string localChunkName = 4;
+	}
+	repeated Location location = 15;
 }

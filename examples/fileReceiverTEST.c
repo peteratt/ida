@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 	
 	ecFileReceive(filename, meta->k, meta->m, meta->loc);
 
-	ecFileDecode(filename);
+	ecFileDecode(filename, meta);
 	
 	free_struct_comLocations(meta->loc);//Free the structure
 	free(meta->loc);
