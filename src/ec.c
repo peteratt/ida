@@ -108,6 +108,11 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	void *buffers;
 	ec->alloc(&buffers, bufsize, &bufsize, context);
 
+	/* Create destination Directory (cache) if doesn't exist */
+	char dirName[256];
+	sprintf(dirName, "%s%s",CACHE_DIR_PATH,CACHE_DIR_NAME);
+	mkdir(dirName, 0777);
+
 	/* Open source file and destination files */
 	source = fopen(filename, "rb");
 	if(!source){
@@ -118,7 +123,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	int j;
 	
 	for (j = 0; j < k + m; j++) {
-		sprintf(filenameDest, "./%s.%d", filename, j);
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
 	    	destination[j] = fopen(filenameDest, "wb");
 		if(!destination[j]){
 			printf("ERROR: %s\n", strerror(errno));
@@ -193,38 +198,6 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	char filenameDest[260];	
 	int bufsize,n,m,filesize,ngood,nbad,j,i,unfinished,nBytes,tmp, towrite, libraryId;
 
-	/*
-	// Load information from metaFile
-	FILE *sourceMeta;
-	char loadedInfo[260];
-
-	sprintf(filenameDest, "./%s.meta", filename);
-	sourceMeta = fopen(filenameDest, "r");
-	if(!sourceMeta){
-		printf("ERROR: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	//Read Filename
-	fgets(loadedInfo, 260, sourceMeta);
-	//printf("%s",loadedInfo);
-	//Read Filesize
-	fscanf(sourceMeta,"%i",&filesize);
-	printf("%i\n",filesize);
-	fgets(loadedInfo, 260, sourceMeta);
-	//Read Time
-	fgets(loadedInfo, 260, sourceMeta);
-	//printf("%s",loadedInfo);
-	//Read m and n
-	fscanf(sourceMeta,"%i %i\n",&n,&m);
-	printf("%i %i\n",n,m);
-	//Read protocol
-	//TODO
-	//Read bufsize
-	fscanf(sourceMeta,"%i\n",&bufsize);
-	printf("%i\n",bufsize);
-	*/
-	
 	filesize = meta->fileSize;
 	n = meta->k;
 	m = meta->m;
@@ -267,7 +240,7 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	}
 
 	for (j = 0; j < n + m; j++) {
-		sprintf(filenameDest, "./%s.%d", filename, j);
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
 	    	source[j] = fopen(filenameDest, "rb");
 		if(!source[j]){
 			if(errno != ENOENT && errno != EACCES){
@@ -368,10 +341,12 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 	//2. We have the destination nodes, we need to attribute blocks to them.
 	for (i = 0; i < blocksNumber; i++) {
 				
+				
 		chunknameLen = sprintf(chunkname, "%s.%d", filehash, i);
 		current->distantChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->distantChunkName,chunkname);
 		
+		chunknameLen = sprintf(chunkname, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filehash, i);
 		current->localChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->localChunkName,chunkname);
 		
@@ -416,7 +391,7 @@ void * threadSendFunc(void * args){
 		sprintf(port_str, "%d", curTransfer->port);
 		
 		printf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		ffs_sendfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		ffs_sendfile_c("udt", curTransfer->hostName, port_str,curTransfer->localChunkName, curTransfer->distantChunkName);
 		
 		return NULL;
 };
@@ -455,7 +430,7 @@ void * threadRecvFunc(void * args){
 		sprintf(port_str, "%d", curTransfer->port);
 		
 		printf("Receiving: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->localChunkName, curTransfer->distantChunkName);
+		ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		
 		return NULL;
 };
@@ -470,6 +445,12 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 	loc->locationsNumber = n; 
 	
 	getRecvLocations(filename,loc,k); // the minimum we need is k (no worries if we get less locations)
+	
+	/* Create destination Directory (cache) if doesn't exist */
+	char dirName[256];
+	sprintf(dirName, "%s%s",CACHE_DIR_PATH,CACHE_DIR_NAME);
+	mkdir(dirName, 0777);
+	
 	
 	struct comTransfer * curTransfer = loc->transfers;
 	
