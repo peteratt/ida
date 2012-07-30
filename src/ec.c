@@ -29,6 +29,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/stat.h>
 
 
 ZHTClient_c zhtClient;
@@ -318,7 +319,22 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	return EXIT_SUCCESS;
 }
 
-int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
+int randomStr(char * destination, int destLen){
+	char * password_chars = "1234567890abcdefghijklmnopqrstuvwxyz";
+	unsigned int iseed = (unsigned int)time(NULL);
+ 	srand (iseed);
+	int i;
+	int random;
+
+	for (i = 0; i < destLen; i++) {
+		random = rand()%(strlen(password_chars)-1);
+		destination[i] = password_chars[random];
+	}
+	destination[destLen-1] = '\0';
+}
+
+
+int getSendLocations(char * filename, struct comLocations * loc, int minimum){
 	
 	int blocksNumber = loc->locationsNumber; //blocksNumber is the number of actual data blocks available
 	int i;
@@ -339,14 +355,19 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 	blocksNumber = LocationsNumber; //The blocksNumber is maxed by the available Locations number
 
 	//2. We have the destination nodes, we need to attribute blocks to them.
-	for (i = 0; i < blocksNumber; i++) {
-				
-				
+	
+	//2.1 RandomFilename
+	char filehash[64];
+	randomStr(filehash,64);
+		
+	
+	for (i = 0; i < blocksNumber; i++) {	
+		
 		chunknameLen = sprintf(chunkname, "%s.%d", filehash, i);
 		current->distantChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->distantChunkName,chunkname);
 		
-		chunknameLen = sprintf(chunkname, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filehash, i);
+		chunknameLen = sprintf(chunkname, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, i);
 		current->localChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->localChunkName,chunkname);
 		
@@ -360,7 +381,7 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 }
 
 
-int getRecvLocations(char * filehash, struct comLocations * loc, int minimum){
+int getRecvLocations(char * filename, struct comLocations * loc, int minimum){
 	
 	//TODO This function should check if the files are available.
 	
