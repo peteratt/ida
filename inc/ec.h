@@ -49,7 +49,7 @@ int ida_finalize();
 
 
 struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId);
-int ecFileDecode(char *filename);
+int ecFileDecode(char *filename, struct metadata * meta);
 int ecFileSend(char *filename, int k, int m, struct comLocations * loc);
 int ecFileReceive(char *filename, int k, int m, struct comLocations * loc);
 int ecInsertMetadata(struct metadata* meta);

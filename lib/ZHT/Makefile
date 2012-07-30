@@ -54,7 +54,7 @@ obj/%.o: src/common/%.cpp obj
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c src/common/$*.cpp -o obj/$*.o
 
 gProto: src/misc/meta.proto
-	rm src/common/*.pb.cpp inc/*.pb.h
+	rm -rf src/common/*.pb.cpp inc/*.pb.h
 	protoc -I=src/misc/ --cpp_out=src/common src/misc/meta.proto
 	mv src/common/*.h inc/
 	rename 's/\.cc/.cpp/' src/common/*.cc
