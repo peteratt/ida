@@ -331,6 +331,8 @@ int randomStr(char * destination, int destLen){
 		destination[i] = password_chars[random];
 	}
 	destination[destLen-1] = '\0';
+	
+	return 0;
 }
 
 
@@ -361,7 +363,7 @@ int getSendLocations(char * filename, struct comLocations * loc, int minimum){
 	randomStr(filehash,64);
 		
 	
-	for (i = 0; i < blocksNumber; i++) {	
+	for (i = blocksNumber-1; i >= 0; i--) {	
 		
 		chunknameLen = sprintf(chunkname, "%s.%d", filehash, i);
 		current->distantChunkName = (char *) malloc(chunknameLen+1);
@@ -446,14 +448,17 @@ int ecFileSend(char *filename, int k, int m, struct comLocations * loc) {
 
 void * threadRecvFunc(void * args){
 		struct comTransfer * curTransfer = (struct comTransfer *)args;
+		int * retval = (int *) malloc(sizeof(int));
 		
 		char port_str[10];
 		sprintf(port_str, "%d", curTransfer->port);
 		
 		printf("Receiving: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		*retval = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		
-		return NULL;
+		pthread_exit((void *)retval);
+		
+		return 0;
 };
 
 int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
@@ -461,7 +466,7 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 	int i;
 	
 	
-	pthread_t threads[n];
+	pthread_t threads[k];
 	
 	loc->locationsNumber = n; 
 	
@@ -475,16 +480,46 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 	
 	struct comTransfer * curTransfer = loc->transfers;
 	
-	for (i = 0; i < loc->locationsNumber; i++) {
-		// Send the chunks through UDT to the server
+	for (i = 0; i < k; i++) {
+		// Receive the chunks from the servers
 		
 		// TODO: Needs error treatment
 		pthread_create(&threads[i], NULL, &threadRecvFunc, (void *)curTransfer);
 		curTransfer = curTransfer->next;
 	}
 	
-	for (i = 0; i < loc->locationsNumber; i++) {
-		pthread_join(threads[i], NULL);
+	
+
+	int failedTransfers = 0;
+	
+	for (i = 0; i < k; i++) {
+		void * thread_retval;
+		pthread_join(threads[i], &thread_retval);
+		
+		failedTransfers -= *((int *)thread_retval); //retval for fail is -1
+		printf("FailedTransfers = %i \n",failedTransfers);
+		free(thread_retval);
+	}
+
+	
+	if(failedTransfers > 0){
+		while(failedTransfers > 0 && curTransfer != NULL){
+			char port_str[10];
+			sprintf(port_str, "%d", curTransfer->port);
+			
+			int retFFS;
+			printf("Receiving(parity): host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+			retFFS = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+			
+			if(retFFS == 0){
+				failedTransfers--;
+			}
+
+			
+			curTransfer = curTransfer->next;
+			printf("FailedTransfers = %i \n",failedTransfers);
+		}
+
 	}
 	
 	return 0;
