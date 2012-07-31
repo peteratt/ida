@@ -10,6 +10,7 @@
 
 #include   <stdbool.h>
 
+#include "../inc/ida_util.h"
 #include "../inc/zht_bridger.h"
 #include "../inc/ec.h"
 #include "../inc/ffsnet_bridger.h"
@@ -306,22 +307,6 @@ int ecFileDecode(char *filename, struct metadata * meta) {
     	ec->destroy(context);
 	
 	return EXIT_SUCCESS;
-}
-
-int randomStr(char * destination, int destLen){
-	char * password_chars = "1234567890abcdefghijklmnopqrstuvwxyz";
-	unsigned int iseed = (unsigned int)time(NULL) ^ (getpid()<<16);
- 	srand (iseed);
-	int i;
-	int random;
-
-	for (i = 0; i < destLen; i++) {
-		random = rand()%(strlen(password_chars)-1);
-		destination[i] = password_chars[random];
-	}
-	destination[destLen-1] = '\0';
-	
-	return 0;
 }
 
 
