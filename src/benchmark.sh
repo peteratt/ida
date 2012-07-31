@@ -11,38 +11,38 @@ sleep 1
 
 ### SEND ###
 
-if [[ -f results_send.csv ]]; then
-	rm results_send.csv
-fi
-
 cd ../examples
-touch results_send.csv
 
-echo filename,filesize,thEncoding,thSending,thTotal >> results_send.csv #First line of the CSV
+if [[ -f results_send_$k_$m_$bufsize.csv ]]; then
+	rm results_send_$k_$m_$bufsize.csv
+fi
+touch results_send_$k_$m_$bufsize.csv
+
+echo filename,filesize,thEncoding,thSending,thTotal >> results_send_$k_$m_$bufsize.csv #First line of the CSV
 
 for file in ida/*
 do
     if [[ -f $file ]]; then
     	echo $file
-        ./fileSenderTEST $file $k $m $bufsize #>> results_send.csv
+        ./fileSenderTEST $file $k $m $bufsize >> results_send_$k_$m_$bufsize.csv
     fi
 done
 
 ### RECEIVE ###
 
-if [[ -f results_recv.csv ]]; then
-	rm results_recv.csv
+if [[ -f results_recv_$k_$m_$bufsize.csv ]]; then
+	rm results_recv_$k_$m_$bufsize.csv
 fi
 
 cd ../examples
-touch results_recv.csv
+touch results_recv_$k_$m_$bufsize.csv
 
-echo filename,filesize,thEncoding,thSending,thTotal >> results_recv.csv #First line of the CSV
+echo filename,filesize,thEncoding,thSending,thTotal >> results_recv_$k_$m_$bufsize.csv #First line of the CSV
 
 for file in ida/*
 do
     if [[ -f $file ]]; then
         echo $file
-        #./fileReceiverTEST $file >> results_recv.csv
+        #./fileReceiverTEST $file >> results_recv_$k_$m_$bufsize.csv
     fi
 done
