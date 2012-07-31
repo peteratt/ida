@@ -125,11 +125,11 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	
 	for (j = 0; j < k + m; j++) {
 		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
-	    	destination[j] = fopen(filenameDest, "wb");
+	    destination[j] = fopen(filenameDest, "wb");
 		if(!destination[j]){
 			dbgprintf("ERROR: %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
-			}
+		}
 	}
 
 	/* Encode N*BUFSIZE bytes at a time then repeat until EOF */
