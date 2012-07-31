@@ -16,11 +16,13 @@
 #include <ffsnet_bridger.h>
 #include <ec.h>
 
-#include "benchmark.c"
+#include "../inc/benchmark.h"
 
 int main(int argc, char* argv[]) {
 
 	struct timeval tvBegin, tvEncoding, tvEnd, t1, t2, totalTime;
+	
+	FILE *results;
 
 	// Initial timestamp
 	gettimeofday(&tvBegin, NULL);
@@ -59,7 +61,7 @@ int main(int argc, char* argv[]) {
 	double throughputTotal = meta->fileSize / (1000000 * totalTime.tv_sec + totalTime.tv_usec);
 	
 	// printf's separated by commas for the CSV
-	printf("%s,%s,%f,%f,%f", meta->filename, meta->fileSize, throughputEncoding, throughputSending, throughputTotal);
+	printf("%s,%lu,%f,%f,%f\n", meta->filename, meta->fileSize, throughputEncoding, throughputSending, throughputTotal);
 	
 	free_struct_comLocations(meta->loc);//Free the structure
 	free(meta->loc);

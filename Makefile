@@ -13,15 +13,13 @@ CPPFLAGS=-g -lstdc++ -Llib -Iinc
 
 LFLAGS=-pthread # -lpthread does not work whereas -pthread does. This may be the contrary for cpp binaries compilation.
 
-LFLAGS+=-lecwrapper #Well...this is our library!
+LFLAGS+=-lecwrapper # Well...this is our library!
 
-PROTOBUF_HOME=/usr/local/include/google/protobuf#your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
+PROTOBUF_HOME=/usr/local/include/google/protobuf # Your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
 CFLAGS+=-I$(PROTOBUF_HOME)
 LFLAGS+=-lprotobuf
 
-
-
-OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o obj/cpp/zht_bridger.o obj/c/ida.o
+OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o obj/cpp/zht_bridger.o obj/c/ida.o obj/c/benchmark.o
 
 .PHONY: clean jerasure examples
 
@@ -80,9 +78,6 @@ zht: lib/ZHT/Makefile
 
 ######################################################
 LIBS+=$(LIBSEc)
-
-
-
 
 examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/fileSenderTEST.c -o examples/fileSenderTEST $(LFLAGS)

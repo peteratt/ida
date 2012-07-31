@@ -1,5 +1,14 @@
 #!/bin/bash
 
+k=$1
+m=$2
+bufsize=$3
+
+./stopServers.sh
+./startServers.sh 6
+
+sleep 1
+
 ### SEND ###
 
 if [[ -f results_send.csv ]]; then
@@ -11,10 +20,11 @@ touch results_send.csv
 
 echo filename,filesize,thEncoding,thSending,thTotal >> results_send.csv #First line of the CSV
 
-for file in ./ida/*
+for file in ida/*
 do
     if [[ -f $file ]]; then
-        ./fileSenderTEST $file $k $m $bufsize >> results_send.csv
+    	echo $file
+        ./fileSenderTEST $file $k $m $bufsize #>> results_send.csv
     fi
 done
 
@@ -29,9 +39,10 @@ touch results_recv.csv
 
 echo filename,filesize,thEncoding,thSending,thTotal >> results_recv.csv #First line of the CSV
 
-for file in ./ida/*
+for file in ida/*
 do
     if [[ -f $file ]]; then
-        ./fileReceiverTEST $file >> results_recv.csv
+        echo $file
+        #./fileReceiverTEST $file >> results_recv.csv
     fi
 done
