@@ -89,7 +89,6 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 
 	FILE *source;
 	FILE *destination[k+m];
-	FILE *destinationMeta;
 
 	/* Initialize Ec Functions and Context */
 	ecFunctions ec;
@@ -152,33 +151,18 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	}
 
 	/* Writing the metaData */
-	sprintf(filenameDest, "./%s.meta", filename);
-    	destinationMeta = fopen(filenameDest, "w");
-	if(!destinationMeta){
-		printf("ERROR: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
 
 	//Filename
-	fprintf(destinationMeta,"%s\n",filename);
 	meta->filename = filename;
 	//FileSize
-	fprintf(destinationMeta,"%ld\n",ftell(source));
 	meta->fileSize = ftell(source);
-	//Time of Encoding
-	time_t rawtime;
-	time ( &rawtime );
-  	fprintf (destinationMeta,"%s", ctime (&rawtime) );
 	//Parameters
-	fprintf(destinationMeta,"%i %i\n", k, m);
 	meta->k = k;
 	meta->m = m;
 	//Type of encoding
 	meta->encodingLib = libraryId;
-	
 	//Buffer size
-	fprintf(destinationMeta,"%i\n",bufsize);
 	meta->bufsize = bufsize;
 
 	/* Close files */
@@ -189,7 +173,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 
 	/* Free allocated memory and destroy Context */
 	ec->free(buffers, context);
-    	ec->destroy(context);
+	ec->destroy(context);
 	
 	return meta;
 }
@@ -310,6 +294,11 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	fclose(destination);
 	for (j = 0; j < ngood; j++) {
 		fclose(source[goodBufIds[j]]);
+	}
+	
+	for(j=0; j < ngood; j++){
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
+		remove(filenameDest);
 	}
 	
 	/* Free allocated memory and destroy Context */
@@ -443,6 +432,12 @@ int ecFileSend(char *filename, int k, int m, struct comLocations * loc) {
 		pthread_join(threads[i], NULL);
 	}
 	
+	char filenameDest[256];
+	for(i=0; i < loc->locationsNumber; i++){
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, i);
+		remove(filenameDest);
+	}
+	
 	return 0;
 }
 
@@ -497,7 +492,6 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 		pthread_join(threads[i], &thread_retval);
 		
 		failedTransfers -= *((int *)thread_retval); //retval for fail is -1
-		printf("FailedTransfers = %i \n",failedTransfers);
 		free(thread_retval);
 	}
 
@@ -517,10 +511,11 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 
 			
 			curTransfer = curTransfer->next;
-			printf("FailedTransfers = %i \n",failedTransfers);
 		}
 
 	}
+	
+	if(failedTransfers > 0) return 1; //NOT ENOUGH CHUNKS
 	
 	return 0;
 }
