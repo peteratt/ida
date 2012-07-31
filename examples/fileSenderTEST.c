@@ -20,6 +20,7 @@
 
 int main(int argc, char* argv[]) {
 
+	freopen( "stderr.log", "w", stderr );
 	struct timeval tvBegin, tvEncoding, tvEnd, t1, t2, totalTime;
 	
 	FILE *results;
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]) {
 	int k = atoi(argv[2]);
 	int m = atoi(argv[3]);
 	int bufsize = atoi(argv[4]);
+
 
 	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
 

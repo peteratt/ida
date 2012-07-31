@@ -29,21 +29,21 @@ const char* zht_parse_meta(struct metadata* meta) {
 	std::string serialized = package.SerializeAsString();
 	
 	cout << serialized << endl;
-	printf("Serialized:%s \n",serialized.c_str());
-	printf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package.k(),package.m(),package.encodinglib(),package.filesize());
+	dbgprintf("Serialized:%s \n",serialized.c_str());
+	dbgprintf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package.k(),package.m(),package.encodinglib(),package.filesize());
 	
 	const char * resString = serialized.c_str();
 	
 	Package package2;
 	package2.ParseFromString(string(resString));
-	printf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package2.k(),package2.m(),package2.encodinglib(),package2.filesize());
+	dbgprintf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package2.k(),package2.m(),package2.encodinglib(),package2.filesize());
 
 
 	std::string reborn = string(resString);
 
 	Package package3;
 	package3.ParseFromString(reborn);
-	printf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package3.k(),package3.m(),package3.encodinglib(),package3.filesize());
+	dbgprintf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package3.k(),package3.m(),package3.encodinglib(),package3.filesize());
 
 	
 	
@@ -93,20 +93,19 @@ int zht_insert_meta(ZHTClient_c zhtClient, struct metadata * meta){
 	//TEST
 	Package package4;
 	package4.ParseFromString(serialized);
-	printf("Serialized: %s \n",serialized.c_str());
-	printf("key: %s \n",(package4.virtualpath()).c_str());
-	printf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package4.k(),package4.m(),package4.encodinglib(),package4.filesize());
+	dbgprintf("Serialized: %s \n",serialized.c_str());
+	dbgprintf("key: %s \n",(package4.virtualpath()).c_str());
+	dbgprintf("k:%i,m:%i,encodinglib:%i,filesize:%i \n",package4.k(),package4.m(),package4.encodinglib(),package4.filesize());
 	
 	for (int j = 0; j < package4.location_size(); j++) {
 		const Package_Location& location = package4.location(j);
 		
-		printf("chunk:%s, port:%i\n",location.localchunkname().c_str(), location.port());
+		dbgprintf("chunk:%s, port:%i\n",location.localchunkname().c_str(), location.port());
 	}	
 	//END TEST
 	*/
 	
 	int res = zhtcppClient->insert(serialized);
-	printf("resInsert:%i \n",res);
 	
 	return res;
 }
@@ -146,8 +145,6 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 	keyPackage.set_operation(1); //1 for look up, 2 for remove, 3 for insert
 	
 	int res = zhtcppClient->lookup(keyPackage.SerializeAsString(),resSerializedPackage);
-
-	printf("resultLookup:%i\n",res);
 
 	//2. Parse Package and fill meta
 	Package package;

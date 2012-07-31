@@ -100,7 +100,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	
 	int rc = ec->init(k, m, &context);
 	if (rc) {
-		printf("Error:  %i\n", rc);
+		dbgprintf("Error:  %i\n", rc);
 		exit(EXIT_FAILURE);
 	}
 
@@ -116,7 +116,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	/* Open source file and destination files */
 	source = fopen(filename, "rb");
 	if(!source){
-		printf("ERROR: %s\n", strerror(errno));
+		dbgprintf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -126,7 +126,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
 	    destination[j] = fopen(filenameDest, "wb");
 		if(!destination[j]){
-			printf("ERROR: %s\n", strerror(errno));
+			dbgprintf("ERROR: %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -198,7 +198,7 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	
 	int rc = ec->init(n, m, &context);
 	if (rc) {
-		printf("Error:  %i\n", rc);
+		dbgprintf("Error:  %i\n", rc);
 		exit(EXIT_FAILURE);
 	}
 
@@ -220,7 +220,7 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 
 	destination = fopen(filename, "wb");
 	if(!destination){
-		printf("ERROR: %s\n", strerror(errno));
+		dbgprintf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -230,7 +230,7 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 		if(!source[j]){
 			if(errno != ENOENT && errno != EACCES){
 			//Its normal not to find some files TODO Note: In a real application, the system should be aware of the failures, and should try in priority the known good parts.
-				printf("ERROR: %s\n", strerror(errno));
+				dbgprintf("ERROR: %s\n", strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 			if(j < n) badBufIds[nbad++] = j;
@@ -310,7 +310,7 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 
 int randomStr(char * destination, int destLen){
 	char * password_chars = "1234567890abcdefghijklmnopqrstuvwxyz";
-	unsigned int iseed = (unsigned int)time(NULL);
+	unsigned int iseed = (unsigned int)time(NULL) ^ (getpid()<<16);
  	srand (iseed);
 	int i;
 	int random;
@@ -402,7 +402,7 @@ void * threadSendFunc(void * args){
 		char port_str[10];
 		sprintf(port_str, "%d", curTransfer->port);
 		
-		printf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		dbgprintf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		ffs_sendfile_c("udt", curTransfer->hostName, port_str,curTransfer->localChunkName, curTransfer->distantChunkName);
 		
 		return NULL;
@@ -448,7 +448,7 @@ void * threadRecvFunc(void * args){
 		char port_str[10];
 		sprintf(port_str, "%d", curTransfer->port);
 		
-		printf("Receiving: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		dbgprintf("Receiving: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		*retval = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		
 		pthread_exit((void *)retval);
@@ -502,7 +502,7 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 			sprintf(port_str, "%d", curTransfer->port);
 			
 			int retFFS;
-			printf("Receiving(parity): host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+			dbgprintf("Receiving(parity): host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 			retFFS = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 			
 			if(retFFS == 0){

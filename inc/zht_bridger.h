@@ -2,6 +2,7 @@
 extern "C" {
 #endif
 
+#include "globals.h"
 #include "ec.h"
 #include "../lib/ZHT/inc/c_zhtclientStd.h"
   

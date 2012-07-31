@@ -172,7 +172,7 @@ vector<struct HostEntity> getMembership(string fileName) {
 	in_addr *address;
 	string ip_address;
 	if (!in.is_open()) {
-		cout << "Membership File read failed." << endl;
+		cerr << "Membership File read failed." << endl;
 		return hostList;
 	}
 	if (!in.eof()) {
@@ -201,7 +201,7 @@ vector<struct HostEntity> getMembership(string fileName) {
 		ip_address = inet_ntoa(*address);
 	}
 	in.close();
-	cout << "finished reading membership info, " << hostList.size() << " nodes"
+	cerr << "finished reading membership info, " << hostList.size() << " nodes"
 			<< endl;
 	return hostList;
 }
