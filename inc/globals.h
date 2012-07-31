@@ -6,6 +6,10 @@
  * Email:   palvare3@iit.edu
  *
  */
+#ifndef IDA_GLOBALS_H_
+#define IDA_GLOBALS_H_ 
+
+
 
 //Libraries
 #define GIBRALTAR 0
@@ -25,3 +29,5 @@
 #else
 	#define dbgprintf(...) fprintf(stderr, __VA_ARGS__)
 #endif
+
+#endif // IDA_GLOBALS_H_ 

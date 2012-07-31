@@ -82,7 +82,7 @@ int ec_init_Library(int libraryId, ecFunctions *ec){
 	return 0;
 }
 
-struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int libraryId){
+struct metadata* ecFileEncode(char *filepath, int k, int m, int bufsize, int libraryId){
 	
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B), Library ID (see globals.h for available libs)
 
@@ -115,7 +115,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	mkdir(dirName, 0777);
 
 	/* Open source file and destination files */
-	source = fopen(filename, "rb");
+	source = fopen(filepath, "rb");
 	if(!source){
 		dbgprintf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -124,7 +124,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	int j;
 	
 	for (j = 0; j < k + m; j++) {
-		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), j);
 	    destination[j] = fopen(filenameDest, "wb");
 		if(!destination[j]){
 			dbgprintf("ERROR: %s\n", strerror(errno));
@@ -155,7 +155,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
 
 	//Filename
-	meta->filename = filename;
+	meta->filename = filepath;
 	//FileSize
 	meta->fileSize = ftell(source);
 	//Parameters
@@ -179,7 +179,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	return meta;
 }
 
-int ecFileDecode(char *filename, struct metadata * meta) {
+int ecFileDecode(char *filepath, struct metadata * meta) {
 	//INPUTS: Filename to Decode
 	char filenameDest[260];	
 	int bufsize,n,m,filesize,ngood,nbad,j,i,unfinished,nBytes,tmp, towrite, libraryId;
@@ -219,14 +219,14 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	ngood=0;
 	nbad=0;
 
-	destination = fopen(filename, "wb");
+	destination = fopen(filepath, "wb");
 	if(!destination){
 		dbgprintf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
 	for (j = 0; j < n + m; j++) {
-		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), j);
 	    	source[j] = fopen(filenameDest, "rb");
 		if(!source[j]){
 			if(errno != ENOENT && errno != EACCES){
@@ -298,7 +298,7 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	}
 	
 	for(j=0; j < ngood; j++){
-		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), j);
 		remove(filenameDest);
 	}
 	
@@ -310,7 +310,7 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 }
 
 
-int getSendLocations(char * filename, struct comLocations * loc, int minimum){
+int getSendLocations(char * filepath, struct comLocations * loc, int minimum){
 	
 	int blocksNumber = loc->locationsNumber; //blocksNumber is the number of actual data blocks available
 	int i;
@@ -343,7 +343,7 @@ int getSendLocations(char * filename, struct comLocations * loc, int minimum){
 		current->distantChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->distantChunkName,chunkname);
 		
-		chunknameLen = sprintf(chunkname, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, i);
+		chunknameLen = sprintf(chunkname, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), i);
 		current->localChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->localChunkName,chunkname);
 		
@@ -393,7 +393,7 @@ void * threadSendFunc(void * args){
 		return NULL;
 };
 
-int ecFileSend(char *filename, int k, int m, struct comLocations * loc) {
+int ecFileSend(char *filepath, int k, int m, struct comLocations * loc) {
 	int n = k + m;
 	int i;
 	
@@ -401,7 +401,7 @@ int ecFileSend(char *filename, int k, int m, struct comLocations * loc) {
 	
 	loc->locationsNumber = n;
 	
-	getSendLocations(filename,loc,n);
+	getSendLocations(filepath,loc,n);
 	
 	struct comTransfer * curTransfer = loc->transfers;
 	
@@ -419,7 +419,7 @@ int ecFileSend(char *filename, int k, int m, struct comLocations * loc) {
 	
 	char filenameDest[256];
 	for(i=0; i < loc->locationsNumber; i++){
-		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, i);
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), i);
 		remove(filenameDest);
 	}
 	
@@ -441,7 +441,7 @@ void * threadRecvFunc(void * args){
 		return 0;
 };
 
-int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
+int ecFileReceive(char *filepath, int k, int m, struct comLocations * loc) {
 	int n = k + m;
 	int i;
 	
@@ -450,7 +450,7 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 	
 	loc->locationsNumber = n; 
 	
-	getRecvLocations(filename,loc,k); // the minimum we need is k (no worries if we get less locations)
+	getRecvLocations(filepath,loc,k); // the minimum we need is k (no worries if we get less locations)
 	
 	/* Create destination Directory (cache) if doesn't exist */
 	char dirName[256];
