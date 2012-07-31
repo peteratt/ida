@@ -30,6 +30,12 @@ all:
 	make examples
 
 #######################################################
+#DEBUG Possibilities
+
+ifeq ($(debug),1)
+CFLAGS+=-D DEBUG
+endif
+#######################################################
 #Jerasure-1.2
 OBJECTS+=obj/c/jerasureCompatibility.o
 LIBSEc+=lib/libjerasure.a

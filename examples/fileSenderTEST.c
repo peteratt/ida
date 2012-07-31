@@ -18,6 +18,8 @@
 
 int main(int argc, char* argv[]) {
 
+	freopen( "stderr.log", "w", stderr );
+
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)
 	char * filename = argv[1];
 	int k = atoi(argv[2]);

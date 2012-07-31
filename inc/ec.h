@@ -20,6 +20,8 @@
 #include <errno.h>
 #include <string.h>
 #include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 struct comLocations {
 	int locationsNumber;

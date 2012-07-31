@@ -14,6 +14,9 @@
 #include <ffsnet_bridger.h>
 
 int main(int argc, char* argv[]) {
+
+	freopen( "stderr.log", "w", stderr );
+
 	//INPUTS: Filename to Decode
 	char * filename = argv[1];
 

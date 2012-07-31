@@ -18,3 +18,10 @@
 #define DEFAULT_BUFSIZE 1024
 #define CACHE_DIR_NAME "ida"
 #define CACHE_DIR_PATH "./"
+
+
+#ifdef DEBUG
+	#define dbgprintf(...) fprintf(stdout, __VA_ARGS__)
+#else
+	#define dbgprintf(...) fprintf(stderr, __VA_ARGS__)
+#endif

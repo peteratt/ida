@@ -5,6 +5,10 @@
  * Email:   palvare3@iit.edu
  *
  */
+#ifndef IDA_GLOBALS_H_
+#define IDA_GLOBALS_H_ 
+
+ 
 #include "ec.h"
 #include <malloc.h>
  
@@ -36,3 +40,5 @@ int ida_download(char * filename){
 
 	return 0;
 }
+
+#endif // IDA_GLOBALS_H_ 
