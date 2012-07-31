@@ -35,7 +35,6 @@ int main(int argc, char* argv[]) {
 	int m = atoi(argv[3]);
 	int bufsize = atoi(argv[4]);
 
-
 	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
 
 	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,JERASURERS);
