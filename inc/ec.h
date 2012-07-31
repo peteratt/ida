@@ -56,6 +56,6 @@ int ecInsertMetadata(struct metadata* meta);
 struct metadata* ecLookupMetadata(char* key);
 void free_struct_comLocations(struct comLocations * loc);
 int getRecvLocations(char * filehash, struct comLocations * loc, int minimum);
-int getSendLocations(char * filehash, struct comLocations * loc, int minimum);
+int getSendLocations(char * filename, struct comLocations * loc, int minimum);
 
 #endif // EC_H_

@@ -21,7 +21,7 @@ LFLAGS+=-lprotobuf
 
 
 
-OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o obj/cpp/zht_bridger.o
+OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o obj/cpp/zht_bridger.o obj/c/ida.o
 
 .PHONY: clean jerasure examples
 

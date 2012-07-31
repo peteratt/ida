@@ -29,6 +29,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/stat.h>
 
 
 ZHTClient_c zhtClient;
@@ -88,7 +89,6 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 
 	FILE *source;
 	FILE *destination[k+m];
-	FILE *destinationMeta;
 
 	/* Initialize Ec Functions and Context */
 	ecFunctions ec;
@@ -151,33 +151,18 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 	}
 
 	/* Writing the metaData */
-	sprintf(filenameDest, "./%s.meta", filename);
-    	destinationMeta = fopen(filenameDest, "w");
-	if(!destinationMeta){
-		printf("ERROR: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
 
 	//Filename
-	fprintf(destinationMeta,"%s\n",filename);
 	meta->filename = filename;
 	//FileSize
-	fprintf(destinationMeta,"%ld\n",ftell(source));
 	meta->fileSize = ftell(source);
-	//Time of Encoding
-	time_t rawtime;
-	time ( &rawtime );
-  	fprintf (destinationMeta,"%s", ctime (&rawtime) );
 	//Parameters
-	fprintf(destinationMeta,"%i %i\n", k, m);
 	meta->k = k;
 	meta->m = m;
 	//Type of encoding
 	meta->encodingLib = libraryId;
-	
 	//Buffer size
-	fprintf(destinationMeta,"%i\n",bufsize);
 	meta->bufsize = bufsize;
 
 	/* Close files */
@@ -188,7 +173,7 @@ struct metadata* ecFileEncode(char *filename, int k, int m, int bufsize, int lib
 
 	/* Free allocated memory and destroy Context */
 	ec->free(buffers, context);
-    	ec->destroy(context);
+	ec->destroy(context);
 	
 	return meta;
 }
@@ -311,6 +296,11 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 		fclose(source[goodBufIds[j]]);
 	}
 	
+	for(j=0; j < ngood; j++){
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, j);
+		remove(filenameDest);
+	}
+	
 	/* Free allocated memory and destroy Context */
 	ec->free(buffers, context);
     	ec->destroy(context);
@@ -318,7 +308,24 @@ int ecFileDecode(char *filename, struct metadata * meta) {
 	return EXIT_SUCCESS;
 }
 
-int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
+int randomStr(char * destination, int destLen){
+	char * password_chars = "1234567890abcdefghijklmnopqrstuvwxyz";
+	unsigned int iseed = (unsigned int)time(NULL);
+ 	srand (iseed);
+	int i;
+	int random;
+
+	for (i = 0; i < destLen; i++) {
+		random = rand()%(strlen(password_chars)-1);
+		destination[i] = password_chars[random];
+	}
+	destination[destLen-1] = '\0';
+	
+	return 0;
+}
+
+
+int getSendLocations(char * filename, struct comLocations * loc, int minimum){
 	
 	int blocksNumber = loc->locationsNumber; //blocksNumber is the number of actual data blocks available
 	int i;
@@ -339,14 +346,19 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 	blocksNumber = LocationsNumber; //The blocksNumber is maxed by the available Locations number
 
 	//2. We have the destination nodes, we need to attribute blocks to them.
-	for (i = 0; i < blocksNumber; i++) {
-				
-				
+	
+	//2.1 RandomFilename
+	char filehash[64];
+	randomStr(filehash,64);
+		
+	
+	for (i = blocksNumber-1; i >= 0; i--) {	
+		
 		chunknameLen = sprintf(chunkname, "%s.%d", filehash, i);
 		current->distantChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->distantChunkName,chunkname);
 		
-		chunknameLen = sprintf(chunkname, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filehash, i);
+		chunknameLen = sprintf(chunkname, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, i);
 		current->localChunkName = (char *) malloc(chunknameLen+1);
 		strcpy(current->localChunkName,chunkname);
 		
@@ -360,7 +372,7 @@ int getSendLocations(char * filehash, struct comLocations * loc, int minimum){
 }
 
 
-int getRecvLocations(char * filehash, struct comLocations * loc, int minimum){
+int getRecvLocations(char * filename, struct comLocations * loc, int minimum){
 	
 	//TODO This function should check if the files are available.
 	
@@ -420,19 +432,28 @@ int ecFileSend(char *filename, int k, int m, struct comLocations * loc) {
 		pthread_join(threads[i], NULL);
 	}
 	
+	char filenameDest[256];
+	for(i=0; i < loc->locationsNumber; i++){
+		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, filename, i);
+		remove(filenameDest);
+	}
+	
 	return 0;
 }
 
 void * threadRecvFunc(void * args){
 		struct comTransfer * curTransfer = (struct comTransfer *)args;
+		int * retval = (int *) malloc(sizeof(int));
 		
 		char port_str[10];
 		sprintf(port_str, "%d", curTransfer->port);
 		
 		printf("Receiving: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+		*retval = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
 		
-		return NULL;
+		pthread_exit((void *)retval);
+		
+		return 0;
 };
 
 int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
@@ -440,7 +461,7 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 	int i;
 	
 	
-	pthread_t threads[n];
+	pthread_t threads[k];
 	
 	loc->locationsNumber = n; 
 	
@@ -454,17 +475,47 @@ int ecFileReceive(char *filename, int k, int m, struct comLocations * loc) {
 	
 	struct comTransfer * curTransfer = loc->transfers;
 	
-	for (i = 0; i < loc->locationsNumber; i++) {
-		// Send the chunks through UDT to the server
+	for (i = 0; i < k; i++) {
+		// Receive the chunks from the servers
 		
 		// TODO: Needs error treatment
 		pthread_create(&threads[i], NULL, &threadRecvFunc, (void *)curTransfer);
 		curTransfer = curTransfer->next;
 	}
 	
-	for (i = 0; i < loc->locationsNumber; i++) {
-		pthread_join(threads[i], NULL);
+	
+
+	int failedTransfers = 0;
+	
+	for (i = 0; i < k; i++) {
+		void * thread_retval;
+		pthread_join(threads[i], &thread_retval);
+		
+		failedTransfers -= *((int *)thread_retval); //retval for fail is -1
+		free(thread_retval);
 	}
+
+	
+	if(failedTransfers > 0){
+		while(failedTransfers > 0 && curTransfer != NULL){
+			char port_str[10];
+			sprintf(port_str, "%d", curTransfer->port);
+			
+			int retFFS;
+			printf("Receiving(parity): host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+			retFFS = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
+			
+			if(retFFS == 0){
+				failedTransfers--;
+			}
+
+			
+			curTransfer = curTransfer->next;
+		}
+
+	}
+	
+	if(failedTransfers > 0) return 1; //NOT ENOUGH CHUNKS
 	
 	return 0;
 }
