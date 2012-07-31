@@ -59,12 +59,12 @@ int main(int argc, char* argv[]) {
 	double throughputTotal = meta->fileSize / (1000000 * totalTime.tv_sec + totalTime.tv_usec);
 	
 	// printf's separated by commas for the CSV
+	printf("%s,%s,%f,%f,%f", meta->filename, meta->fileSize, throughputEncoding, throughputSending, throughputTotal);
 	
 	free_struct_comLocations(meta->loc);//Free the structure
 	free(meta->loc);
 	free(meta);
 	
 	ida_finalize();
-	
 	return 0;
 }
