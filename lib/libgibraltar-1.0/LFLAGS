@@ -1,1 +1,1 @@
--lgibraltar -L /usr/local/cuda/lib64 -lcudart -lcuda
+-lgibraltar -L -lcudart -lcuda
