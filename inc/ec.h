@@ -28,6 +28,7 @@ struct comLocations {
 struct comTransfer {
 	char * hostName;
 	int port;
+	int chunkNumber;
 	char * distantChunkName;
 	char * localChunkName;
 	struct comTransfer * next;
