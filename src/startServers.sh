@@ -4,7 +4,7 @@
 #Output #creation of a file with the pid of servers
 
 
-NUMSERVERS=5 #Default number of servers
+NUMSERVERS=1 #Default number of servers is only one per node
 
 if `echo $1 | grep -q [^[:digit:]]`; then
    echo "$1 is not a number"
@@ -25,7 +25,7 @@ fi
 ZHTNEIGHBORFILE=zhtNeighborFile
 >$ZHTNEIGHBORFILE
 
-PIDFILE=servers.pid
+PIDFILE=/mnt/ssd/servers.pid
 if [ -a $PIDFILE ]; then
 	./stopServers.sh
 	rm $PIDFILE
@@ -34,28 +34,28 @@ fi
 >$PIDFILE
 
 for ((i = 0; i < $NUMSERVERS; i++)); do
-	port=$(($i+50000))
+	port=$(($i+40000))
 	echo "localhost $port" >> $ZHTNEIGHBORFILE
 done
 
-FFSNETSERVER=../../bin/ffsnetd
-ZHTSERVER=../lib/ZHT/bin/server_zht
-ZHTCONFIG=../lib/ZHT/zht.cfg
+FFSNETSERVER=~/ida/bin/ffsnetd
+ZHTSERVER=~/ida/lib/ZHT/bin/server_zht
+ZHTCONFIG=~/ida/lib/ZHT/zht.cfg
 
-TESTINGFOLDER=../testingEnv
-BACKFROMTESTING=../../src/
+TESTINGFOLDER=/mnt/ssd/idaData
+BACKFROMTESTING=~/ida/src/
 
 mkdir $TESTINGFOLDER
 
 for ((i = 0; i < $NUMSERVERS; i++)); do
 	mkdir $TESTINGFOLDER/serv$i
 	cd $TESTINGFOLDER/serv$i
-	port=$(($i+59000))	
+	port=$(($i+49000))	
 	$FFSNETSERVER $port &
-	echo $! >> $BACKFROMTESTING$PIDFILE
+	echo $! >> $PIDFILE
 	cd $BACKFROMTESTING
 	
-	port=$(($i+50000))
+	port=$(($i+40000))
 	$ZHTSERVER $port $ZHTNEIGHBORFILE $ZHTCONFIG "UDP" &
 	echo $! >> $PIDFILE
 done

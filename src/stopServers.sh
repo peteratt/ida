@@ -1,8 +1,8 @@
 #!/bin/bash
 #Stop the servers
 
-PIDFILE=servers.pid
-TESTINGFOLDER=../testingEnv
+PIDFILE=/mnt/ssd/servers.pid
+TESTINGFOLDER=/mnt/ssd/idaData
 
 if [ -d "$TESTINGFOLDER" ]; then
 	while true; do
@@ -26,6 +26,6 @@ done < $PIDFILE
 
 
 
-rm -rf $PIDFILE
+rm $PIDFILE
 echo "............................................."
 echo "Have fun now\n"
