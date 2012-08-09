@@ -15,7 +15,7 @@ LFLAGS=-pthread # -lpthread does not work whereas -pthread does. This may be the
 
 LFLAGS+=-lecwrapper # Well...this is our library!
 
-PROTOBUF_HOME=/usr/local/include/google/protobuf # Your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
+PROTOBUF_HOME=/export/home/palvare3/protobuf # Your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
 CFLAGS+=-I$(PROTOBUF_HOME)
 LFLAGS+=-lprotobuf
 
