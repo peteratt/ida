@@ -1,16 +1,7 @@
-/**
- * File name: ffsnetd.cpp
+/* Author:  Corentin Debains
+ * Email:   cdebains@iit.edu
  *
- * Function: daemon process for FusionFS network transfer
  *
- * Author: dzhao8@hawk.iit.edu
- *
- * Update history:
- *		- 06/18/2012: initial development
- *
- * To compile this single file:
- * 		g++ ffsnetd.cpp -o ffsnetd -I../src -L../src -ludt -lstdc++ -lpthread
- *		NOTE: -I../src (similarly to -L../src) means to include the directory of the udt library, i.e. libudt.so 
  */
 
 #include <cstdlib>
@@ -19,10 +10,196 @@
 #include <iostream>
 #include <cstring>
 #include <udt.h>
+#include <malloc.h>
+
+#include <linux/limits.h>
+#include <sys/stat.h>
+#include <cerrno>
+
+#include "ffsnet.h"
 
 using namespace std;
 
-void* transfile(void*);
+/* RECEIVE FILE */
+int recvFile(UDTSOCKET * fhandleP, char * filepath){
+		
+		UDTSOCKET fhandle = *fhandleP;
+		
+		/* open the file to write */
+		fstream fileS(filepath, ios::out | ios::binary | ios::trunc);
+		int buffersize;
+		int bufnumber; 
+		int64_t offset = 0;
+		int64_t recvsize;		
+		
+		/* get buffersize information */
+		if (UDT::ERROR == UDT::recv(fhandle, (char*)&buffersize, sizeof(int), 0)) {
+
+			UDT::close(fhandle);
+			fileS.close();
+
+			cout << "Buffersize Reception ERROR: " << UDT::getlasterror().getErrorMessage() << endl;
+			return 1;
+		}
+		printf("recv buffersize:%i \n",buffersize);
+		
+		/* get buffernumbers information */
+		if (UDT::ERROR == UDT::recv(fhandle, (char*)&bufnumber, sizeof(int), 0)) {
+
+			UDT::close(fhandle);
+			fileS.close();
+
+			cout << "buffernumber Reception ERROR: " << UDT::getlasterror().getErrorMessage() << endl;
+			return 1;
+		}
+		printf("recv buffernumber:%i \n",bufnumber);
+
+		if (buffersize < 0 || bufnumber < 0) {
+
+			UDT::close(fhandle);
+			fileS.close();
+
+			cout << "BufferSize or BufferNumber inconsistent \n";
+			return 1;
+		}
+
+		cout << "Now Waiting for data \n";
+
+		/* receive the buffers */
+		int bufGroupSize = 1; //currently we receive 4 buffers before writing
+		char * buffer = (char *) malloc(sizeof(char)*bufGroupSize*buffersize);
+		long res = 0;
+		
+		int bufGroupNumber = bufnumber/bufGroupSize;
+		if(bufnumber % bufGroupSize != 0) bufGroupNumber++;
+		
+		for(int j=0; j < bufGroupNumber; j++){
+			cout << "Now Waiting for data group(" << j <<")" << endl;
+			recvsize = UDT::recv(fhandle, buffer, sizeof(char)*bufGroupSize*buffersize, 0);
+			if (UDT::ERROR == recvsize){
+				UDT::close(fhandle);
+				fileS.close();
+
+				cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
+				return 1;
+			}
+			else{
+				cout << "Writing to file " << recvsize << " Bytes" << endl;
+				fileS.write(buffer,recvsize);
+				res += recvsize;
+			}
+		}
+		
+		/* Send the number of bytes read as an ack */
+		cout << "Sending ACK with "<< res << "Bytes" << endl;
+		if (UDT::ERROR == UDT::send(fhandle, (char *)&res, sizeof(long), 0)) {
+			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl;
+			return 1;
+		}
+
+		cout << "Closing File" << endl;
+		fileS.close();
+		return 0;
+}
+
+int sendFile(UDTSOCKET * fhandleP, char * filepath){
+
+		UDTSOCKET fhandle = *fhandleP;
+
+		/* open the file */
+		fstream fileS(filepath, ios::in | ios::binary);
+		
+		if(fileS.fail()){ //failbit set to 1, error opening the file
+			cout << "Cannot of the file " << filepath << endl;
+			return 1;
+		}
+		
+		fileS.seekg(0, ios::end);
+		int64_t totalsize = fileS.tellg();
+		fileS.seekg(0, ios::beg);
+		
+		
+		UDT::TRACEINFO trace;
+		UDT::perfmon(fhandle, &trace);
+
+		/* send the file */
+		int64_t offset = 0;
+		if (UDT::ERROR == UDT::sendfile(fhandle, fileS, offset, totalsize)) {
+
+			/* DFZ: This error might be triggered if the file size is zero, which is fine. */
+
+			UDT::close(fhandle);
+			fileS.close();
+
+			cout << "sendfile: " << UDT::getlasterror().getErrorMessage() << endl;
+			return 1;
+		}
+
+		UDT::perfmon(fhandle, &trace);
+		/* cout << "speed = " << trace.mbpsSendRate << "Mbits/sec" << endl; */
+
+		fileS.close();
+}
+
+/**
+ * Thread to accept file request: download or upload
+ */
+void* connecHandler(void* usocket)
+{
+	UDTSOCKET fhandle = *(UDTSOCKET*)usocket;
+	delete (UDTSOCKET*)usocket;
+
+	/* aquiring file name information from client */
+	char * filepath;
+	int len;
+	int operationID;
+	int operationRes;
+	
+	/* get the request type: download or upload */
+	if (UDT::ERROR == UDT::recv(fhandle, (char*)&operationID, sizeof(int), 0)) {
+		cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
+		return 0;   
+	}
+	
+	/* Get the filename (or dir) length and the string */
+	if (UDT::ERROR == UDT::recv(fhandle, (char*)&len, sizeof(int), 0)) {
+
+		UDT::close(fhandle);
+		cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
+		return 0;
+	}
+	
+	filepath = (char *) malloc(sizeof(char)*len+1);
+	
+	if (UDT::ERROR == UDT::recv(fhandle, filepath, len, 0)) {
+
+		UDT::close(fhandle);
+		cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
+		return 0;
+	}
+	filepath[len] = '\0';
+
+	/* Choose the appropriate action in function of the operation requested */
+	switch(operationID){
+		case SERVER_RECVFILE:
+			operationRes = recvFile(&fhandle, filepath);
+			break;
+		case SERVER_SENDFILE:
+			operationRes = sendFile(&fhandle, filepath);
+			break;
+		default:
+			operationRes = 1;//WTF did I just read?
+	}
+	
+
+
+	/*clean up*/
+	free(filepath);
+	UDT::close(fhandle);
+
+	return NULL;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -71,6 +248,8 @@ int main(int argc, char* argv[])
 	UDTSOCKET fhandle;
 
 	while (true) {
+		// Note: everything after this loop is useless. This loop should be based on a variable, and that variable modified if a sigkill or sigstop is rece
+	
 		if (UDT::INVALID_SOCK == (fhandle = UDT::accept(serv, (sockaddr*)&clientaddr, &addrlen))) {
 			cout << "accept: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 0;
@@ -82,7 +261,7 @@ int main(int argc, char* argv[])
 		/* cout << "new connection: " << clienthost << ":" << clientservice << endl; */
 		
 		pthread_t filethread;
-		pthread_create(&filethread, NULL, transfile, new UDTSOCKET(fhandle));
+		pthread_create(&filethread, NULL, connecHandler, new UDTSOCKET(fhandle));
 		pthread_detach(filethread);
 	}
 
@@ -94,110 +273,4 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-/**
- * Thread to accept file request: download or upload
- */
-void* transfile(void* usocket)
-{
-	UDTSOCKET fhandle = *(UDTSOCKET*)usocket;
-	delete (UDTSOCKET*)usocket;
 
-	/* aquiring file name information from client */
-	char file[1024];
-	int len;
-	int is_recv; /* 0: download, 1: upload */
-	
-	/* get the request type: download or upload */
-	if (UDT::ERROR == UDT::recv(fhandle, (char*)&is_recv, sizeof(int), 0)) {
-		cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
-		return 0;   
-	}
-	
-	if (is_recv) {
-		if (UDT::ERROR == UDT::recv(fhandle, (char*)&len, sizeof(int), 0)) {
-			cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
-			return 0;
-		}
-
-		if (UDT::ERROR == UDT::recv(fhandle, file, len, 0)) {
-			cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
-			return 0;
-		}
-		file[len] = '\0';
-
-		/* open the file to write */
-		fstream ofs(file, ios::out | ios::binary | ios::trunc);
-		int64_t recvsize; 
-		int64_t offset = 0;		
-
-		
-		/* get size information */
-		int64_t size;
-
-		if (UDT::ERROR == UDT::recv(fhandle, (char*)&size, sizeof(int64_t), 0)) {
-			cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-			return 0;
-		}
-
-		if (size < 0) {
-			cout << "cannot open file " << file << " on the server\n";
-			return 0;
-		}
-
-		/* receive the file */
-		if (UDT::ERROR == (recvsize = UDT::recvfile(fhandle, ofs, offset, size))) {
-			cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
-			return 0;
-		}
-
-		UDT::close(fhandle);
-
-		ofs.close();		
-
-		return NULL;
-	}
-
-	/* the following is for download */
-	if (UDT::ERROR == UDT::recv(fhandle, (char*)&len, sizeof(int), 0)) {
-		cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
-		return 0;
-	}
-
-	if (UDT::ERROR == UDT::recv(fhandle, file, len, 0)) {
-		cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
-		return 0;
-	}
-	file[len] = '\0';
-
-	/* open the file */
-	fstream ifs(file, ios::in | ios::binary);
-
-	ifs.seekg(0, ios::end);
-	int64_t size = ifs.tellg();
-	ifs.seekg(0, ios::beg);
-
-	/* send file size information */
-	if (UDT::ERROR == UDT::send(fhandle, (char*)&size, sizeof(int64_t), 0))	{
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return 0;
-	}
-
-	UDT::TRACEINFO trace;
-	UDT::perfmon(fhandle, &trace);
-
-	/* send the file */
-	int64_t offset = 0;
-	if (UDT::ERROR == UDT::sendfile(fhandle, ifs, offset, size)) {
-		cout << "sendfile: " << UDT::getlasterror().getErrorMessage() << endl;
-		return 0;
-	}
-
-	UDT::perfmon(fhandle, &trace);
-	/* cout << "speed = " << trace.mbpsSendRate << "Mbits/sec" << endl; */
-
-	UDT::close(fhandle);
-
-	ifs.close();
-
-	return NULL;
-}

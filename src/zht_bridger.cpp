@@ -13,11 +13,11 @@
 //DEPRECATED
 const char* zht_parse_meta(struct metadata* meta) {
 	Package package;
-	package.set_virtualpath(meta->filename); //as key
+	package.set_virtualpath(meta->key); //as key
 	package.set_isdir(false);
 	package.set_replicano(1);
 	package.set_operation(3); //1 for look up, 2 for remove, 3 for insert
-	package.set_realfullpath(meta->filename);
+	package.set_realfullpath(meta->physicalPath);
 	
 	// IDA metadata
 	package.set_k(meta->k);
@@ -56,7 +56,7 @@ int zht_insert_meta(ZHTClient_c zhtClient, struct metadata * meta){
 	ZHTClient * zhtcppClient = (ZHTClient *) zhtClient;
 
 	Package package;
-	string keyStr(meta->filename);
+	string keyStr(meta->key);
 	
 	//1. General infos on the file/storage
 	package.set_virtualpath(keyStr); //as key
@@ -82,7 +82,6 @@ int zht_insert_meta(ZHTClient_c zhtClient, struct metadata * meta){
 		location->set_hostname(string(current->hostName));
 		location->set_port(current->port);
 		location->set_distantchunkname(string(current->distantChunkName));
-		location->set_localchunkname(string(current->localChunkName));
 		
 		current=current->next;
 	}
@@ -120,7 +119,7 @@ struct metadata* zht_unparse_meta(const char* text) {
 	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
 	meta->loc = (struct comLocations *) malloc(sizeof(struct comLocations));
 	
-	meta->filename = package.virtualpath().c_str();
+	meta->key = package.virtualpath().c_str();
 	meta->k = package.k();
 	meta->m = package.m();
 	meta->bufsize = package.bufsize();
@@ -153,7 +152,7 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 	struct metadata* meta = (struct metadata*)malloc(sizeof(struct metadata));
 	
 	//2.1 General file infos
-	meta->filename = package.virtualpath().c_str();
+	meta->key = package.virtualpath().c_str();
 	meta->k = package.k();
 	meta->m = package.m();
 	meta->bufsize = package.bufsize();
@@ -180,9 +179,6 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 		
 		current->distantChunkName = (char *) malloc((location.distantchunkname()).size()+1);
 		strcpy(current->distantChunkName,location.distantchunkname().c_str());
-		
-		current->localChunkName = (char *) malloc((location.localchunkname()).size()+1);
-		strcpy(current->localChunkName,(location.localchunkname()).c_str());
 		
 		current->next = prev;
 		prev = current;

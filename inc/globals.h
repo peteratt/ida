@@ -22,6 +22,7 @@
 #define DEFAULT_BUFSIZE 1024
 #define CACHE_DIR_NAME "ida"
 #define CACHE_DIR_PATH "./"
+#define CHUNKNAME_LENGTH 64
 
 
 #ifdef DEBUG

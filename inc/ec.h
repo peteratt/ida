@@ -30,12 +30,12 @@ struct comTransfer {
 	int port;
 	int chunkNumber;
 	char * distantChunkName;
-	char * localChunkName;
 	struct comTransfer * next;
 };
 
 struct metadata {
-	const char *filename;
+	const char * key;
+	const char * physicalPath;
 	int k;
 	int m;
 	int encodingLib;
@@ -47,15 +47,18 @@ struct metadata {
 int ida_init(char* neighbors, char* config);
 int ida_finalize();
 
-
-struct metadata* ecFileEncode(char *filepath, int k, int m, int bufsize, int libraryId);
-int ecFileDecode(char *filepath, struct metadata * meta);
-int ecFileSend(char *filepath, int k, int m, struct comLocations * loc);
-int ecFileReceive(char *filepath, int k, int m, struct comLocations * loc);
-int ecInsertMetadata(struct metadata* meta);
+int ecfillmeta(const char * key, const char * physicalPath, int k, int m , int encodingLib, int bufsize, struct metadata ** metaP);
 struct metadata* ecLookupMetadata(char* key);
+int ecInsertMetadata(struct metadata* meta);
+
+int ecFileEncode(struct metadata * meta);
+int ecFileDecode(char *filepath, struct metadata * meta);
+//int ecFileSend(char *filepath, int k, int m, struct comLocations * loc);
+//int ecFileReceive(char *filepath, int k, int m, struct comLocations * loc);
+
 void free_struct_comLocations(struct comLocations * loc);
+
 int getRecvLocations(char * filehash, struct comLocations * loc, int minimum);
-int getSendLocations(char * filename, struct comLocations * loc, int minimum);
+int getSendLocations(int minimum, int chunksize, struct comLocations * loc);
 
 #endif // EC_H_

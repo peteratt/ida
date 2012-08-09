@@ -1,23 +1,36 @@
-/**
- * File: ffsnet_bridger.cpp
- * Desc: This is a C wrapper to call the ffsnet library
- * Author: dzhao8@hawk.iit.edu
- * History:
- * 		06/25/2011 - initial development
+/* Author:  Corentin Debains
+ * Email:   cdebains@iit.edu
  *
- * Compile to a shared library:
- *		g++ -fPIC ffsnet_bridger.cpp --shared -o libffsnet_bridger.so -L. -lffsnet
  *
  */
+#include "ffsnet.h"
+#include "ffsnetCPP.h"
 
-#include "../inc/ffsnet_bridger.h"
-#include "../inc/ffsnet.h"
+int * Transfer_init_c(UDTArray_c * SsocksP, struct metadata * meta, int operation){
+	UDTArray * SsocksCPP_P = (UDTArray *) SsocksP;
+	
+	int * res = Transfer_init(SsocksCPP_P, meta, operation);
+	*SsocksP = (UDTArray_c) (*SsocksCPP_P);
+	
+	return res;
+}
 
-  int ffs_recvfile_c(const char *proto, const char *remote_ip, const char *server_port, const char *remote_filename, const char *local_filename) {
-	  return ffs_recvfile(proto, remote_ip, server_port, remote_filename, local_filename);
-  }
+int bufferSend_c(UDTArray_c Ssocks, int index, unsigned char * buffer){
+	UDTArray SsocksCPP = (UDTArray) Ssocks;
+	
+	return bufferSend(SsocksCPP, index, buffer);
+}
 
-  int ffs_sendfile_c(const char *proto, const char *remote_ip, const char *server_port, const char *local_filename, const char *remote_filename) {
-	  return ffs_sendfile(proto, remote_ip, server_port, local_filename, remote_filename);
-  }
+int bufferRecv_c(UDTArray_c Ssocks, int index, unsigned char * buffer){
+	UDTArray SsocksCPP = (UDTArray) Ssocks;
+	
+	return bufferRecv(SsocksCPP, index, buffer);
+}
+
+int Transfer_destroy_c(UDTArray_c Ssocks){
+	UDTArray SsocksCPP = (UDTArray) Ssocks;
+	
+	return Transfer_destroy(SsocksCPP);
+}
+
 

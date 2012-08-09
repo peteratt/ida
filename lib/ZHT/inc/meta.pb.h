@@ -118,17 +118,6 @@ class Package_Location : public ::google::protobuf::Message {
   inline ::std::string* mutable_distantchunkname();
   inline ::std::string* release_distantchunkname();
   
-  // required string localChunkName = 4;
-  inline bool has_localchunkname() const;
-  inline void clear_localchunkname();
-  static const int kLocalChunkNameFieldNumber = 4;
-  inline const ::std::string& localchunkname() const;
-  inline void set_localchunkname(const ::std::string& value);
-  inline void set_localchunkname(const char* value);
-  inline void set_localchunkname(const char* value, size_t size);
-  inline ::std::string* mutable_localchunkname();
-  inline ::std::string* release_localchunkname();
-  
   // @@protoc_insertion_point(class_scope:Package.Location)
  private:
   inline void set_has_hostname();
@@ -137,18 +126,15 @@ class Package_Location : public ::google::protobuf::Message {
   inline void clear_has_port();
   inline void set_has_distantchunkname();
   inline void clear_has_distantchunkname();
-  inline void set_has_localchunkname();
-  inline void clear_has_localchunkname();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
   ::std::string* hostname_;
   ::std::string* distantchunkname_;
-  ::std::string* localchunkname_;
   ::google::protobuf::int32 port_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
   
   friend void  protobuf_AddDesc_meta_2eproto();
   friend void protobuf_AssignDesc_meta_2eproto();
@@ -540,64 +526,6 @@ inline ::std::string* Package_Location::release_distantchunkname() {
   } else {
     ::std::string* temp = distantchunkname_;
     distantchunkname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-
-// required string localChunkName = 4;
-inline bool Package_Location::has_localchunkname() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void Package_Location::set_has_localchunkname() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void Package_Location::clear_has_localchunkname() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void Package_Location::clear_localchunkname() {
-  if (localchunkname_ != &::google::protobuf::internal::kEmptyString) {
-    localchunkname_->clear();
-  }
-  clear_has_localchunkname();
-}
-inline const ::std::string& Package_Location::localchunkname() const {
-  return *localchunkname_;
-}
-inline void Package_Location::set_localchunkname(const ::std::string& value) {
-  set_has_localchunkname();
-  if (localchunkname_ == &::google::protobuf::internal::kEmptyString) {
-    localchunkname_ = new ::std::string;
-  }
-  localchunkname_->assign(value);
-}
-inline void Package_Location::set_localchunkname(const char* value) {
-  set_has_localchunkname();
-  if (localchunkname_ == &::google::protobuf::internal::kEmptyString) {
-    localchunkname_ = new ::std::string;
-  }
-  localchunkname_->assign(value);
-}
-inline void Package_Location::set_localchunkname(const char* value, size_t size) {
-  set_has_localchunkname();
-  if (localchunkname_ == &::google::protobuf::internal::kEmptyString) {
-    localchunkname_ = new ::std::string;
-  }
-  localchunkname_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* Package_Location::mutable_localchunkname() {
-  set_has_localchunkname();
-  if (localchunkname_ == &::google::protobuf::internal::kEmptyString) {
-    localchunkname_ = new ::std::string;
-  }
-  return localchunkname_;
-}
-inline ::std::string* Package_Location::release_localchunkname() {
-  clear_has_localchunkname();
-  if (localchunkname_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = localchunkname_;
-    localchunkname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }

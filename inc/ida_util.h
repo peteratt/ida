@@ -8,3 +8,5 @@
  
 int randomStr(char * destination, int destLen);
 char* get_filename_from_path(char* filepath);
+int getBufferNumbers(int filesize,int k , int bufsize);
+int getchunksize(int filesize, int k, int bufsize);
