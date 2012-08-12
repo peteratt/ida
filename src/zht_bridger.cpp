@@ -177,12 +177,13 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 		//const std::string host = location.hostname();
 		current->hostName = (char *) malloc((location.hostname()).size()+1);
 		strcpy(current->hostName,location.hostname().c_str());
-		dbgprintf("Host (%i):%s \n",j,location.hostname().c_str());
 		
 		current->port = location.port();
 		
 		current->distantChunkName = (char *) malloc((location.distantchunkname()).size()+1);
 		strcpy(current->distantChunkName,location.distantchunkname().c_str());
+		
+		dbgprintf("Host (%i):%s - port: %i - chunkname: %s\n",j,location.hostname().c_str(),location.port(), location.distantchunkname().c_str());
 		
 		current->next = prev;
 		prev = current;

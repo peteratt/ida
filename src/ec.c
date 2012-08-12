@@ -182,21 +182,16 @@ int ecFileEncode(struct metadata * meta){
 		//1-read		
 		bytesRead = fread(buffers,sizeof(unsigned char), bufsize*k, source);
 
-		printf("Bytes REad: %i \n", bytesRead);
-
 		if(bytesRead < bufsize * k){//Padding(with 0s) if necessary
 			memset((unsigned char *) buffers + bytesRead, 0, bufsize*k - bytesRead);
 		}
 		
 		if(bytesRead > 0){
-			printf("Before Encode \n");
 			//2-encode
 			ec->generate(buffers, bufsize, context);
-			printf("Before Send \n");
 			//3-Write
 			int j;
 			for (j = 0; j < k + m; j++) {
-					printf("Sending Buffer %i\n",j);
 					bufferSend_c(socks, index[j], (unsigned char *)buffers + j*bufsize);//Push data into the sending queue
 			}
 		}
@@ -242,10 +237,16 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	void *buffers;
 	ec->alloc(&buffers, bufsize, &bufsize, context);
 
-
+	/* Open Reception Sockets */
+	UDTArray_c socks = NULL; //NULL is here to remove (warning: ‘socks’ may be used uninitialized in this function)
+	int * index = Transfer_init_c(&socks, meta, CLIENT_RECVBUF);
+	if(*index == -1){
+		printf("Socket Creation Error (not enough targets or too many errors). Aborting..\n");
+		exit(EXIT_FAILURE);
+	}
+	
 	/* Identify missing files and open files */
 	//TODO Check files checksum + length to garantee correctness
-	FILE *source[n+m];
 	FILE *destination;
 
 	int goodBufIds[m+n];
@@ -259,22 +260,15 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 		dbgprintf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+	
+	int currentIndex=0;
 
 	for (j = 0; j < n + m; j++) {
-		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), j);
-	    	source[j] = fopen(filenameDest, "rb");
-		if(!source[j]){
-			if(errno != ENOENT && errno != EACCES){
-			//Its normal not to find some files TODO Note: In a real application, the system should be aware of the failures, and should try in priority the known good parts.
-				dbgprintf("ERROR: %s\n", strerror(errno));
-				exit(EXIT_FAILURE);
-			}
-			if(j < n) badBufIds[nbad++] = j;
+		if(index[j+nbad] != j){
+			badBufIds[nbad++] = j; // There was a if(j < n) .....why?!, do we stop counting bad buffers after n is passed?
 		}
 		else{
-			goodBufIds[ngood] = j;
-
-			ngood++;
+			goodBufIds[ngood++] = j;
 		}
 	}
 
@@ -294,7 +288,8 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	
 	while (unfinished) {
 		for (j = 0; j < ngood; j++) {
-			fread(buffers + j*bufsize,sizeof(unsigned char), bufsize, source[goodBufIds[j]]);
+			dbgprintf("Reading %i from socket %i",j,index[j]);
+			bufferRecv_c(socks, index[j], buffers + j*bufsize);
 		}
 	
 		int buf_ids[256];
@@ -328,14 +323,6 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	/* Close files */
 	//fclose(sourceMeta);
 	fclose(destination);
-	for (j = 0; j < ngood; j++) {
-		fclose(source[goodBufIds[j]]);
-	}
-	
-	for(j=0; j < ngood; j++){
-		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), j);
-		remove(filenameDest);
-	}
 	
 	/* Free allocated memory and destroy Context */
 	ec->free(buffers, context);

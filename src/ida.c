@@ -26,7 +26,7 @@ int ida_send(char * filename, int k, int m, int bufsize){
 int ida_download(char * filename){
 
 	struct metadata* meta = ecLookupMetadata(filename);//filename = virtual path here (key)
-	exit(1);
+
 	ecFileDecode(filename, meta);//filename = physical path here
 	
 	free_struct_comLocations(meta->loc);//Free the structure

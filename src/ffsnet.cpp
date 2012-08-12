@@ -116,8 +116,6 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 								return &failure;
 							}
 							//UDT::setsockopt(fhandle, 0, UDT_SNDSYN, &blocking, sizeof(bool)); //makes the socket non-blocking
-							// Add the socket to the index (this socket is open and available)
-							indexArray[curIndex++]=i;
 							break;
 							}
 						case CLIENT_RECVBUF:
@@ -128,6 +126,8 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 							break;
 					
 					}
+					// Add the socket to the index (this socket is open and available)
+					indexArray[curIndex++]=i;
 				}
 			}
 			current = current->next;

@@ -124,6 +124,7 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 
 		/* send the file */
 		int64_t offset = 0;
+		cout << "Now sending the file" << endl;
 		if (UDT::ERROR == UDT::sendfile(fhandle, fileS, offset, totalsize)) {
 
 			/* DFZ: This error might be triggered if the file size is zero, which is fine. */
