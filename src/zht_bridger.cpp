@@ -88,7 +88,8 @@ int zht_insert_meta(ZHTClient_c zhtClient, struct metadata * meta){
 	//4. Insertion
 	std::string serialized = package.SerializeAsString();
 	
-	/*
+	dbgprintf("Package Length:%i\n",serialized.size());
+	
 	//TEST
 	Package package4;
 	package4.ParseFromString(serialized);
@@ -99,10 +100,10 @@ int zht_insert_meta(ZHTClient_c zhtClient, struct metadata * meta){
 	for (int j = 0; j < package4.location_size(); j++) {
 		const Package_Location& location = package4.location(j);
 		
-		dbgprintf("chunk:%s, port:%i\n",location.localchunkname().c_str(), location.port());
+		dbgprintf("chunk:%s, port:%i\n",location.distantchunkname().c_str(), location.port());
 	}	
 	//END TEST
-	*/
+	
 	
 	int res = zhtcppClient->insert(serialized);
 	
@@ -145,6 +146,9 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 	
 	int res = zhtcppClient->lookup(keyPackage.SerializeAsString(),resSerializedPackage);
 
+	dbgprintf("Package Length:%i\n",resSerializedPackage.size());
+
+	
 	//2. Parse Package and fill meta
 	Package package;
 	package.ParseFromString(resSerializedPackage);
@@ -173,7 +177,7 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 		//const std::string host = location.hostname();
 		current->hostName = (char *) malloc((location.hostname()).size()+1);
 		strcpy(current->hostName,location.hostname().c_str());
-
+		dbgprintf("Host (%i):%s \n",j,location.hostname().c_str());
 		
 		current->port = location.port();
 		

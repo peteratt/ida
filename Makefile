@@ -32,6 +32,7 @@ all:
 
 ifeq ($(debug),1)
 CFLAGS+=-D DEBUG
+CPPFLAGS+=-D DEBUG
 endif
 #######################################################
 #Jerasure-1.2
