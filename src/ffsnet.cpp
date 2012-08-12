@@ -64,7 +64,8 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 		UDTSOCKET fhandle;
 		struct comTransfer * current = meta->loc->transfers;
 		
-		int i;
+		int i,fileAvailable;
+		int everythingOK = 0; //yes by default
 		char port_str[6];
 		for(i=0; i < socksNumber; i++){			
 
@@ -118,16 +119,32 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 							//UDT::setsockopt(fhandle, 0, UDT_SNDSYN, &blocking, sizeof(bool)); //makes the socket non-blocking
 							break;
 							}
-						case CLIENT_RECVBUF:
-							//we should make sure here that the file exists and is available
-							//if not, same if can't connect (to handle serv available but not file)
-							break;
+						case CLIENT_RECVBUF:{
+								/* Receive file status (0 = available) */
+								if (UDT::ERROR == UDT::recv(fhandle, (char*) &fileAvailable, sizeof(int), 0)) {
+									cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
+									return 0;   
+								}
+								
+								if(fileAvailable == 0){
+									cout << "Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
+								}
+								else{
+									cout << "NON AVAILABLE Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
+									if(socksreqNumber < socksNumber-1){
+										socksreqNumber++;
+										everythingOK=1;
+									}//if can't connect, then make sure to get one of the emergency one
+									else return &failure;
+								}
+								break;
+							}
 						default:
 							break;
 					
 					}
-					// Add the socket to the index (this socket is open and available)
-					indexArray[curIndex++]=i;
+					// Add the socket to the index (this socket is open and file is available)
+					if(everythingOK == 0) indexArray[curIndex++]=i;
 				}
 			}
 			current = current->next;

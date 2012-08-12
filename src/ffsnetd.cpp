@@ -106,13 +106,24 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 
 		UDTSOCKET fhandle = *fhandleP;
 
+		int alive=0;
+		
 		/* open the file */
 		fstream fileS(filepath, ios::in | ios::binary);
 		
 		if(fileS.fail()){ //failbit set to 1, error opening the file
 			cout << "Cannot of the file " << filepath << endl;
-			return 1;
+			alive = 1;//file is not available
 		}
+		
+		/* We tell the client if the file is available */
+		if (UDT::ERROR == UDT::send(fhandle, (char *)&alive, sizeof(int), 0)) {
+				cout << "filename send: " << UDT::getlasterror().getErrorMessage() << endl;
+				return 1;
+		}
+		
+		//If file is not alive, we return
+		if(alive != 0) return 1;
 		
 		fileS.seekg(0, ios::end);
 		int64_t totalsize = fileS.tellg();

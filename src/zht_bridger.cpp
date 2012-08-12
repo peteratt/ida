@@ -169,7 +169,7 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 	struct comTransfer * current;
 	struct comTransfer * prev = NULL;
 
-	for (int j = 0; j < package.location_size(); j++) {
+	for (int j = package.location_size() -1 ; j >= 0; j--) {
 		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
 	
 		const Package_Location& location = package.location(j);

@@ -288,7 +288,7 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	
 	while (unfinished) {
 		for (j = 0; j < ngood; j++) {
-			dbgprintf("Reading %i from socket %i",j,index[j]);
+			dbgprintf("Reading %i from socket %i\n",j,index[j]);
 			bufferRecv_c(socks, index[j], buffers + j*bufsize);
 		}
 	
@@ -359,7 +359,8 @@ int getSendLocations(int minimum, int chunksize, struct comLocations * loc){
 	randomStr(filehash,64);
 		
 	
-	for (i = blocksNumber-1; i >= 0; i--) {	
+	//for (i = blocksNumber-1; i >= 0; i--) {	
+	for (i = 0; i < blocksNumber; i++) {	
 		
 		chunknameLen = sprintf(chunkname, "%s.%d", filehash, i);
 		current->distantChunkName = (char *) malloc(chunknameLen+1);
