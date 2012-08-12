@@ -60,7 +60,7 @@ int zht_insert_meta(ZHTClient_c zhtClient, struct metadata * meta){
 	
 	//1. General infos on the file/storage
 	package.set_virtualpath(keyStr); //as key
-	package.set_isdir(true);
+	package.set_isdir(false);
 	package.set_replicano(1);
 	package.set_operation(3); //1 for look up, 2 for remove, 3 for insert
 	package.set_realfullpath(keyStr);
@@ -139,7 +139,7 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 	
 	Package keyPackage;
 	keyPackage.set_virtualpath(keyStr); //as key
-	keyPackage.set_isdir(true);
+	keyPackage.set_isdir(false);
 	keyPackage.set_replicano(1);
 	keyPackage.set_operation(1); //1 for look up, 2 for remove, 3 for insert
 	
@@ -168,7 +168,7 @@ struct metadata * zht_lookup_meta(ZHTClient_c zhtClient, const char * key){
 	for (int j = 0; j < package.location_size(); j++) {
 		current = (struct comTransfer *) malloc(sizeof(struct comTransfer));
 	
-		const Package_Location location = package.location(j);
+		const Package_Location& location = package.location(j);
 	
 		//const std::string host = location.hostname();
 		current->hostName = (char *) malloc((location.hostname()).size()+1);
