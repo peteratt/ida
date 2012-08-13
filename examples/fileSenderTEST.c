@@ -57,9 +57,9 @@ int main(int argc, char* argv[]) {
 	timeval_subtract(&t2, &tvEnd, &tvEncoding);
 	timeval_subtract(&totalTime, &tvEnd, &tvBegin);
 	
-	double throughputEncoding = meta->fileSize / (1000000 * t1.tv_sec + t1.tv_usec);
-	double throughputSending = meta->fileSize / (1000000 * t2.tv_sec + t2.tv_usec);
-	double throughputTotal = meta->fileSize / (1000000 * totalTime.tv_sec + totalTime.tv_usec);
+	double throughputEncoding = (double)meta->fileSize / (double)(1000000 * t1.tv_sec + t1.tv_usec);
+	double throughputSending = (double)meta->fileSize / (double)(1000000 * t2.tv_sec + t2.tv_usec);
+	double throughputTotal = (double)meta->fileSize / (double)(1000000 * totalTime.tv_sec + totalTime.tv_usec);
 	
 	// printf's separated by commas for the CSV
 	printf("%s,%lu,%f,%f,%f\n", meta->filename, meta->fileSize, throughputEncoding, throughputSending, throughputTotal);
