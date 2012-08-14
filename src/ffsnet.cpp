@@ -177,13 +177,20 @@ int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer, int bufsize){
 	return res;
 }
 int bufferRecv(UDTArray Ssocks, int index, unsigned char * buffer, int bufsize){
+	//Return -1 if socket is empty (in non-blocking mode)
+	int res;
 	
-	if (UDT::ERROR == UDT::recv(Ssocks->socks[index], (char *)buffer, bufsize, 0)) {
-			cout << "Receive: " << UDT::getlasterror().getErrorMessage() << endl;
-			return 1;
+	if (UDT::ERROR == (res = UDT::recv(Ssocks->socks[index], (char *)buffer, bufsize, 0))) {
+		if(UDT::getlasterror().getErrorCode() != 6002){ //6001 == EASYNCRCV
+			cout << "Receive: " << UDT::getlasterror().getErrorMessage() << endl; 
+			exit(1); //fail :(
+		}
+		else{
+			return -1;
+		}
 	}
 
-	return 0;
+	return res;
 }
 
 int Transfer_destroy(UDTArray Ssocks){
