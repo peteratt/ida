@@ -336,8 +336,10 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	}
 	
 	/* Close files */
-	//fclose(sourceMeta);
 	fclose(destination);
+	
+	/* Closing the sockets */
+	Transfer_destroy_c(socks); 
 	
 	/* Free allocated memory and destroy Context */
 	ec->free(buffers, context);
