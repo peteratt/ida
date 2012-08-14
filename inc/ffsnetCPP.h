@@ -19,6 +19,6 @@ struct UDTArray_s{
 typedef struct UDTArray_s * UDTArray;
 
 int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation);
-int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer, int bufsize);
-int bufferRecv(UDTArray Ssocks, int index, unsigned char * buffer, int bufsize);
+int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer);
+int bufferRecv(UDTArray Ssocks, int index, unsigned char * buffer);
 int Transfer_destroy(UDTArray Ssocks);

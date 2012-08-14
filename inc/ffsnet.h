@@ -22,8 +22,8 @@ extern "C" {
 typedef void * UDTArray_c;
 
 int * Transfer_init_c(UDTArray_c * Ssocks, struct metadata * meta, int operation);
-int bufferSend_c(UDTArray_c Ssocks, int index, unsigned char * buffer, int bufsize);
-int bufferRecv_c(UDTArray_c Ssocks, int index, unsigned char * buffer, int bufsize);
+int bufferSend_c(UDTArray_c Ssocks, int index, unsigned char * buffer);
+int bufferRecv_c(UDTArray_c Ssocks, int index, unsigned char * buffer);
 int Transfer_destroy_c(UDTArray_c Ssocks); 
 
 #ifdef __cplusplus

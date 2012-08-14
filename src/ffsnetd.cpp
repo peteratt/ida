@@ -66,58 +66,43 @@ int recvFile(UDTSOCKET * fhandleP, char * filepath){
 		cout << "Now Waiting for data \n";
 
 		/* receive the buffers */
-		/* SOLUTION 1 = by group of buffers */
-		//*
 		int bufGroupSize = 1; //currently we receive 4 buffers before writing
 		char * buffer = (char *) malloc(sizeof(char)*bufGroupSize*buffersize);
-
-		int recvBytes = 0;
+		long res = 0;
 		
 		int bufGroupNumber = bufnumber/bufGroupSize;
 		if(bufnumber % bufGroupSize != 0) bufGroupNumber++;
 		
+<<<<<<< HEAD
 		while(recvBytes < buffersize*bufnumber){
 			recvsize = UDT::recvmsg(fhandle, buffer, sizeof(char)*bufGroupSize*buffersize);
+=======
+		for(int j=0; j < bufGroupNumber; j++){
+			cout << "Now Waiting for data group(" << j <<")" << endl;
+			recvsize = UDT::recv(fhandle, buffer, sizeof(char)*bufGroupSize*buffersize, 0);
+>>>>>>> e111038... Sending Stream - Big Files issues -
 			if (UDT::ERROR == recvsize){
 				UDT::close(fhandle);
 				fileS.close();
 
 				cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
-				break;
+				return 1;
 			}
 			else{
 				cout << "Writing to file " << recvsize << " Bytes" << endl;
 				fileS.write(buffer,recvsize);
-				recvBytes += recvsize;
+				res += recvsize;
 			}
 		}
-		//*/
-		/*END SOLUTION 1 = by group of buffers */
-		/* SOLUTION 2 = using recvfile */
-		/*
-		int bufGroupSize = 1; //currently we receive 4 buffers before writing
-		char * buffer = (char *) malloc(sizeof(char)*bufGroupSize*buffersize);
-		long res = 0;
-		int recvBytes = 0;
-		
-		recvsize = UDT::recvfile(fhandle, fileS, offset, buffersize*bufnumber);
-		if (UDT::ERROR == recvsize){
-			UDT::close(fhandle);
-			fileS.close();
-
-			cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
-			res = 0;
-		}
-		else{
-			res = buffersize*bufnumber;
-		}
-		
-		/*/
-		/*END SOLUTION 2 = using recvfile */
 		
 		/* Send the number of bytes read as an ack */
+<<<<<<< HEAD
 		cout << "Sending ACK with "<< recvBytes << "Bytes" << endl;
 		if (UDT::ERROR == UDT::sendmsg(fhandle, (char *)&recvBytes, sizeof(long), -1, true)) {
+=======
+		cout << "Sending ACK with "<< res << "Bytes" << endl;
+		if (UDT::ERROR == UDT::send(fhandle, (char *)&res, sizeof(long), 0)) {
+>>>>>>> e111038... Sending Stream - Big Files issues -
 			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 		}
@@ -178,6 +163,7 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 			}
 			if( fileS.eof() ) break;
 		}
+<<<<<<< HEAD
 		
 		cout << "File was sent" << endl;
 		
@@ -187,6 +173,8 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 			return 1;
 		}
 		cout <<  "Received ACK from client, now in peace with myself" << endl;
+=======
+>>>>>>> e111038... Sending Stream - Big Files issues -
 
 		UDT::perfmon(fhandle, &trace);
 		/* cout << "speed = " << trace.mbpsSendRate << "Mbits/sec" << endl; */
