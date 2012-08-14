@@ -93,7 +93,7 @@ examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
 bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a 
-	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(LFLAGS)
+	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd -L$(UDTLOC)/src -ludt -pthread
 
 lib/libecwrapper.a: obj libs $(OBJECTS)
 	mv obj/c/*.o obj/

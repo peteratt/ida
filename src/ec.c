@@ -116,6 +116,8 @@ struct metadata* ecFileEncode(char *filepath, int k, int m, int bufsize, int lib
 
 	/* Open source file and destination files */
 	source = fopen(filepath, "rb");
+	setvbuf(source, NULL, _IOFBF, 1048576*500);
+
 	if(!source){
 		dbgprintf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -125,7 +127,9 @@ struct metadata* ecFileEncode(char *filepath, int k, int m, int bufsize, int lib
 	
 	for (j = 0; j < k + m; j++) {
 		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), j);
-	    destination[j] = fopen(filenameDest, "wb");
+	   	destination[j] = fopen(filenameDest, "wb");
+		setvbuf(destination[j], NULL, _IOFBF, 1048576*100);
+
 		if(!destination[j]){
 			dbgprintf("ERROR: %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
