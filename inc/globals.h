@@ -23,6 +23,7 @@
 #define CACHE_DIR_NAME "ida"
 #define CACHE_DIR_PATH "./"
 #define CHUNKNAME_LENGTH 64
+#define NETWORK_CAP 128000 // Max network speed in B (used to wait for network in case of buffer maximized)
 
 
 #ifdef DEBUG

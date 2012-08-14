@@ -15,16 +15,16 @@ int * Transfer_init_c(UDTArray_c * SsocksP, struct metadata * meta, int operatio
 	return res;
 }
 
-int bufferSend_c(UDTArray_c Ssocks, int index, unsigned char * buffer){
+int bufferSend_c(UDTArray_c Ssocks, int index, unsigned char * buffer, int bufsize){
 	UDTArray SsocksCPP = (UDTArray) Ssocks;
 	
-	return bufferSend(SsocksCPP, index, buffer);
+	return bufferSend(SsocksCPP, index, buffer, bufsize);
 }
 
-int bufferRecv_c(UDTArray_c Ssocks, int index, unsigned char * buffer){
+int bufferRecv_c(UDTArray_c Ssocks, int index, unsigned char * buffer, int bufsize){
 	UDTArray SsocksCPP = (UDTArray) Ssocks;
 	
-	return bufferRecv(SsocksCPP, index, buffer);
+	return bufferRecv(SsocksCPP, index, buffer, bufsize);
 }
 
 int Transfer_destroy_c(UDTArray_c Ssocks){

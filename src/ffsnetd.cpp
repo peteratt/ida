@@ -66,33 +66,58 @@ int recvFile(UDTSOCKET * fhandleP, char * filepath){
 		cout << "Now Waiting for data \n";
 
 		/* receive the buffers */
+		/* SOLUTION 1 = by group of buffers */
+		//*
 		int bufGroupSize = 1; //currently we receive 4 buffers before writing
 		char * buffer = (char *) malloc(sizeof(char)*bufGroupSize*buffersize);
-		long res = 0;
+
+		int recvBytes = 0;
 		
 		int bufGroupNumber = bufnumber/bufGroupSize;
 		if(bufnumber % bufGroupSize != 0) bufGroupNumber++;
 		
-		for(int j=0; j < bufGroupNumber; j++){
-			cout << "Now Waiting for data group(" << j <<")" << endl;
+		while(recvBytes < buffersize*bufnumber){
 			recvsize = UDT::recv(fhandle, buffer, sizeof(char)*bufGroupSize*buffersize, 0);
 			if (UDT::ERROR == recvsize){
 				UDT::close(fhandle);
 				fileS.close();
 
 				cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
-				return 1;
+				break;
 			}
 			else{
 				cout << "Writing to file " << recvsize << " Bytes" << endl;
 				fileS.write(buffer,recvsize);
-				res += recvsize;
+				recvBytes += recvsize;
 			}
 		}
+		//*/
+		/*END SOLUTION 1 = by group of buffers */
+		/* SOLUTION 2 = using recvfile */
+		/*
+		int bufGroupSize = 1; //currently we receive 4 buffers before writing
+		char * buffer = (char *) malloc(sizeof(char)*bufGroupSize*buffersize);
+		long res = 0;
+		int recvBytes = 0;
+		
+		recvsize = UDT::recvfile(fhandle, fileS, offset, buffersize*bufnumber);
+		if (UDT::ERROR == recvsize){
+			UDT::close(fhandle);
+			fileS.close();
+
+			cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
+			res = 0;
+		}
+		else{
+			res = buffersize*bufnumber;
+		}
+		
+		/*/
+		/*END SOLUTION 2 = using recvfile */
 		
 		/* Send the number of bytes read as an ack */
-		cout << "Sending ACK with "<< res << "Bytes" << endl;
-		if (UDT::ERROR == UDT::send(fhandle, (char *)&res, sizeof(long), 0)) {
+		cout << "Sending ACK with "<< recvBytes << "Bytes" << endl;
+		if (UDT::ERROR == UDT::send(fhandle, (char *)&recvBytes, sizeof(long), 0)) {
 			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 		}
@@ -146,6 +171,8 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 			cout << "sendfile: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 		}
+
+		cout << "File was sent" << endl;
 
 		UDT::perfmon(fhandle, &trace);
 		/* cout << "speed = " << trace.mbpsSendRate << "Mbits/sec" << endl; */
