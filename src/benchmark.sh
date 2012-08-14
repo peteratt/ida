@@ -20,7 +20,7 @@ touch results_send.$k.$m.$bufsize.csv
 
 echo filename,filesize,thEncoding,thSending,thTotal >> results_send.$k.$m.$bufsize.csv #First line of the CSV
 
-for file in ida/*
+for file in testFiles/*
 do
     if [[ -f $file ]]; then
     	echo $file
@@ -39,7 +39,7 @@ touch results_recv.$k.$m.$bufsize.csv
 
 echo filename,filesize,thEncoding,thSending,thTotal >> results_recv.$k.$m.$bufsize.csv #First line of the CSV
 
-for file in ida/*
+for file in testFiles/*
 do
     if [[ -f $file ]]; then
         echo $file

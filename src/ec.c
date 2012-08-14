@@ -116,6 +116,8 @@ struct metadata* ecFileEncode(char *filepath, int k, int m, int bufsize, int lib
 
 	/* Open source file and destination files */
 	source = fopen(filepath, "rb");
+	setvbuf(source, NULL, _IOFBF, 1048576*500);
+	
 	if(!source){
 		dbgprintf("ERROR: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -143,12 +145,12 @@ struct metadata* ecFileEncode(char *filepath, int k, int m, int bufsize, int lib
 		}
 		
 		//2-encode
-    		ec->generate(buffers, bufsize, context);
+    	ec->generate(buffers, bufsize, context);
 
 		//3-Write
 		for (j = 0; j < k + m; j++) {
-    			fwrite((unsigned char *)buffers + j*bufsize, sizeof(unsigned char), bufsize, destination[j]);
-    		}
+    		fwrite((unsigned char *)buffers + j*bufsize, sizeof(unsigned char), bufsize, destination[j]);
+    	}
 	}
 
 	/* Writing the metaData */

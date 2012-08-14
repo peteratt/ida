@@ -25,10 +25,6 @@ int main(int argc, char* argv[]) {
 	
 	FILE *results;
 
-	// Initial timestamp
-	gettimeofday(&tvBegin, NULL);
-	timeval_print(&tvBegin);
-
 	//INPUTS: Filename to Encode, # data blocks (n), # parity blocks (m), size of buffer (in B)
 	char * filename = argv[1];
 	int k = atoi(argv[2]);
@@ -36,8 +32,12 @@ int main(int argc, char* argv[]) {
 	int bufsize = atoi(argv[4]);
 
 	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
+	
+	// Initial timestamp
+	gettimeofday(&tvBegin, NULL);
+	//timeval_print(&tvBegin);
 
-	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,JERASURERS);
+	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,GIBRALTAR);
 	
 	// Timestamp after encoding, to retrieve overhead
 	gettimeofday(&tvEncoding, NULL);
@@ -57,9 +57,17 @@ int main(int argc, char* argv[]) {
 	timeval_subtract(&t2, &tvEnd, &tvEncoding);
 	timeval_subtract(&totalTime, &tvEnd, &tvBegin);
 	
-	double throughputEncoding = meta->fileSize / (1000000 * t1.tv_sec + t1.tv_usec);
-	double throughputSending = meta->fileSize / (1000000 * t2.tv_sec + t2.tv_usec);
-	double throughputTotal = meta->fileSize / (1000000 * totalTime.tv_sec + totalTime.tv_usec);
+	printf("tBegin, tEncoding, tEnd, t1, t2, totalTime\n");
+	timeval_print(&tvBegin);
+	timeval_print(&tvEncoding);
+	timeval_print(&tvEnd);
+	timeval_print(&t1);
+	timeval_print(&t2);
+	timeval_print(&totalTime);
+	
+	double throughputEncoding = (double)meta->fileSize / (double)(1000000 * t1.tv_sec + t1.tv_usec);
+	double throughputSending = (double)meta->fileSize / (double)(1000000 * t2.tv_sec + t2.tv_usec);
+	double throughputTotal = (double)meta->fileSize / (double)(1000000 * totalTime.tv_sec + totalTime.tv_usec);
 	
 	// printf's separated by commas for the CSV
 	printf("%s,%lu,%f,%f,%f\n", meta->filename, meta->fileSize, throughputEncoding, throughputSending, throughputTotal);
