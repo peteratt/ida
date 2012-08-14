@@ -178,6 +178,10 @@ int ecFileEncode(struct metadata * meta){
 	
 	/* Encode N*BUFSIZE bytes at a time then repeat until EOF */
 	int bytesRead;
+	int retSend=-1;
+	int totalTrans;
+	
+	int BytesTrans=0;
 	while(!feof(source)){
 		//1-read		
 		bytesRead = fread(buffers,sizeof(unsigned char), bufsize*k, source);
@@ -192,12 +196,17 @@ int ecFileEncode(struct metadata * meta){
 			//3-Write
 			int j;
 			for (j = 0; j < k + m; j++) {
-					bufferSend_c(socks, index[j], (unsigned char *)buffers + j*bufsize);//Push data into the sending queue
+					retSend = -1;
+					totalTrans = 0;
+					while(retSend == -1 || totalTrans != bufsize){
+						retSend = bufferSend_c(socks, index[j], (unsigned char *)buffers + j*bufsize, bufsize - totalTrans);//Push data into the sending queue
+						if(retSend != -1) totalTrans += retSend;
+					}
+					BytesTrans +=totalTrans;
 			}
+			printf("BytesTrans:%i\n",BytesTrans);
 		}
 	}
-
-	//sleep(3);//to test here
 
 	/* Closing the sockets */
 	Transfer_destroy_c(socks); 
@@ -285,11 +294,19 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	
 	unfinished = 1;
 	nBytes = 0;
+	int retSend=-1;
+	int totalTrans;
 	
 	while (unfinished) {
 		for (j = 0; j < ngood; j++) {
 			dbgprintf("Reading %i from socket %i\n",j,index[j]);
-			bufferRecv_c(socks, index[j], buffers + j*bufsize);
+			retSend = -1;
+			totalTrans = 0;
+
+			while(retSend == -1 || totalTrans != bufsize){
+				retSend = bufferRecv_c(socks, index[j], buffers + j*bufsize, bufsize - totalTrans);//Push data into the sending queue
+				if(retSend != -1) totalTrans += retSend;
+			}
 		}
 	
 		int buf_ids[256];

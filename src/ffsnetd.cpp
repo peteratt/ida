@@ -68,31 +68,30 @@ int recvFile(UDTSOCKET * fhandleP, char * filepath){
 		/* receive the buffers */
 		int bufGroupSize = 1; //currently we receive 4 buffers before writing
 		char * buffer = (char *) malloc(sizeof(char)*bufGroupSize*buffersize);
-		long res = 0;
+		long recvBytes = 0;
 		
 		int bufGroupNumber = bufnumber/bufGroupSize;
 		if(bufnumber % bufGroupSize != 0) bufGroupNumber++;
 		
-		for(int j=0; j < bufGroupNumber; j++){
-			cout << "Now Waiting for data group(" << j <<")" << endl;
+		while(recvBytes < buffersize*bufnumber){
 			recvsize = UDT::recv(fhandle, buffer, sizeof(char)*bufGroupSize*buffersize, 0);
 			if (UDT::ERROR == recvsize){
 				UDT::close(fhandle);
 				fileS.close();
 
 				cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
-				return 1;
+				break;
 			}
 			else{
 				cout << "Writing to file " << recvsize << " Bytes" << endl;
 				fileS.write(buffer,recvsize);
-				res += recvsize;
+				recvBytes += recvsize;
 			}
 		}
 		
 		/* Send the number of bytes read as an ack */
-		cout << "Sending ACK with "<< res << "Bytes" << endl;
-		if (UDT::ERROR == UDT::send(fhandle, (char *)&res, sizeof(long), 0)) {
+		cout << "Sending ACK with "<< recvBytes << "Bytes" << endl;
+		if (UDT::ERROR == UDT::send(fhandle, (char *)&recvBytes, sizeof(long), 0)) {
 			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 		}
@@ -148,7 +147,7 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 		}
 
 		int ackClient;
-		if (UDT::ERROR == UDT::recvmsg(fhandle, (char *)&ackClient, sizeof(int))) {
+		if (UDT::ERROR == UDT::recv(fhandle, (char *)&ackClient, sizeof(int),0)) {
 			cout << "Receive ACK: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 		}
