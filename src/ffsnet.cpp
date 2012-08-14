@@ -60,10 +60,14 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 		hints.ai_flags = AI_PASSIVE;
 		hints.ai_family = AF_INET;
 <<<<<<< HEAD
+<<<<<<< HEAD
 		//hints.ai_socktype = SOCK_STREAM;
 		hints.ai_socktype = SOCK_DGRAM;
 
 		bool blocking = true; // set to true if you want blocking calls
+=======
+		hints.ai_socktype = SOCK_STREAM;
+>>>>>>> e111038... Sending Stream - Big Files issues -
 =======
 		hints.ai_socktype = SOCK_STREAM;
 >>>>>>> e111038... Sending Stream - Big Files issues -
@@ -170,6 +174,7 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer){
 	
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (UDT::ERROR == (res = UDT::sendmsg(Ssocks->socks[index], (char *)buffer, bufsize, -1, true))) {
 		if(UDT::getlasterror().getErrorCode() != 6001){ //6001 == EASYNCSND
 			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl; 
@@ -179,11 +184,16 @@ int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer){
 			return -1;
 		}
 =======
+=======
+>>>>>>> e111038... Sending Stream - Big Files issues -
 	printf("meta->bufsize: %i",Ssocks->meta->bufsize);
 	
 	if (UDT::ERROR == UDT::send(Ssocks->socks[index], (char *)buffer, Ssocks->meta->bufsize, 0)) {
 		cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl;
 		return 1;
+<<<<<<< HEAD
+>>>>>>> e111038... Sending Stream - Big Files issues -
+=======
 >>>>>>> e111038... Sending Stream - Big Files issues -
 	}
 
@@ -192,9 +202,13 @@ int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer){
 int bufferRecv(UDTArray Ssocks, int index, unsigned char * buffer){
 	
 <<<<<<< HEAD
+<<<<<<< HEAD
 	int res;
 	if (UDT::ERROR == (res = UDT::recvmsg(Ssocks->socks[index], (char *)buffer, bufsize))) {
 		if(UDT::getlasterror().getErrorCode() != 6002){ //6001 == EASYNCSND
+=======
+	if (UDT::ERROR == UDT::recv(Ssocks->socks[index], (char *)buffer, Ssocks->meta->bufsize, 0)) {
+>>>>>>> e111038... Sending Stream - Big Files issues -
 =======
 	if (UDT::ERROR == UDT::recv(Ssocks->socks[index], (char *)buffer, Ssocks->meta->bufsize, 0)) {
 >>>>>>> e111038... Sending Stream - Big Files issues -

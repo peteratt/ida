@@ -74,9 +74,12 @@ int recvFile(UDTSOCKET * fhandleP, char * filepath){
 		if(bufnumber % bufGroupSize != 0) bufGroupNumber++;
 		
 <<<<<<< HEAD
+<<<<<<< HEAD
 		while(recvBytes < buffersize*bufnumber){
 			recvsize = UDT::recvmsg(fhandle, buffer, sizeof(char)*bufGroupSize*buffersize);
 =======
+=======
+>>>>>>> e111038... Sending Stream - Big Files issues -
 		for(int j=0; j < bufGroupNumber; j++){
 			cout << "Now Waiting for data group(" << j <<")" << endl;
 			recvsize = UDT::recv(fhandle, buffer, sizeof(char)*bufGroupSize*buffersize, 0);
@@ -97,8 +100,13 @@ int recvFile(UDTSOCKET * fhandleP, char * filepath){
 		
 		/* Send the number of bytes read as an ack */
 <<<<<<< HEAD
+<<<<<<< HEAD
 		cout << "Sending ACK with "<< recvBytes << "Bytes" << endl;
 		if (UDT::ERROR == UDT::sendmsg(fhandle, (char *)&recvBytes, sizeof(long), -1, true)) {
+=======
+		cout << "Sending ACK with "<< res << "Bytes" << endl;
+		if (UDT::ERROR == UDT::send(fhandle, (char *)&res, sizeof(long), 0)) {
+>>>>>>> e111038... Sending Stream - Big Files issues -
 =======
 		cout << "Sending ACK with "<< res << "Bytes" << endl;
 		if (UDT::ERROR == UDT::send(fhandle, (char *)&res, sizeof(long), 0)) {
@@ -164,6 +172,7 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 			if( fileS.eof() ) break;
 		}
 <<<<<<< HEAD
+<<<<<<< HEAD
 		
 		cout << "File was sent" << endl;
 		
@@ -173,6 +182,8 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 			return 1;
 		}
 		cout <<  "Received ACK from client, now in peace with myself" << endl;
+=======
+>>>>>>> e111038... Sending Stream - Big Files issues -
 =======
 >>>>>>> e111038... Sending Stream - Big Files issues -
 
