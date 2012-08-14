@@ -59,18 +59,7 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 		memset(&hints, 0, sizeof(struct addrinfo));
 		hints.ai_flags = AI_PASSIVE;
 		hints.ai_family = AF_INET;
-<<<<<<< HEAD
-<<<<<<< HEAD
-		//hints.ai_socktype = SOCK_STREAM;
-		hints.ai_socktype = SOCK_DGRAM;
-
-		bool blocking = true; // set to true if you want blocking calls
-=======
 		hints.ai_socktype = SOCK_STREAM;
->>>>>>> e111038... Sending Stream - Big Files issues -
-=======
-		hints.ai_socktype = SOCK_STREAM;
->>>>>>> e111038... Sending Stream - Big Files issues -
 
 		UDTSOCKET fhandle;
 		struct comTransfer * current = meta->loc->transfers;
@@ -99,18 +88,18 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 				else{
 					// send the request type
 					int opeAddress = operation;
-					if (UDT::ERROR == UDT::sendmsg(fhandle, (char*)&operation, sizeof(int), -1, true))	{
+					if (UDT::ERROR == UDT::send(fhandle, (char*)&operation, sizeof(int), 0))	{
 						cout << "opeSend: " << UDT::getlasterror().getErrorMessage() << endl;
 						return &failure;
 					}
 					// send the filename length
 					int len = strlen(current->distantChunkName);
-					if (UDT::ERROR == UDT::sendmsg(fhandle, (char*)&len, sizeof(int), -1, true)) {
+					if (UDT::ERROR == UDT::send(fhandle, (char*)&len, sizeof(int), 0)) {
 						cout << "filename len Send: " << UDT::getlasterror().getErrorMessage() << endl;
 						return &failure;
 					}
 					// send the filename
-					if (UDT::ERROR == UDT::sendmsg(fhandle, current->distantChunkName, len, -1, true)) {
+					if (UDT::ERROR == UDT::send(fhandle, current->distantChunkName, len, 0)) {
 						cout << "filename send: " << UDT::getlasterror().getErrorMessage() << endl;
 						return &failure;
 					}
@@ -118,12 +107,12 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 					switch(operation){
 						case CLIENT_SENDBUF:{
 							/* send buffersize information */
-							if (UDT::ERROR == UDT::sendmsg(fhandle, (char *) &(meta->bufsize), sizeof(int), -1, true)) {
+							if (UDT::ERROR == UDT::send(fhandle, (char *) &(meta->bufsize), sizeof(int), 0)) {
 								cout << "buffersize send: " << UDT::getlasterror().getErrorMessage() << endl;
 								return &failure;
 							}
 							/* send buffernumbers information */
-							if (UDT::ERROR == UDT::sendmsg(fhandle, (char *) &(buffernumbers), sizeof(int), -1, true)) {
+							if (UDT::ERROR == UDT::send(fhandle, (char *) &(buffernumbers), sizeof(int), 0)) {
 								cout << "buffernumbers send: " << UDT::getlasterror().getErrorMessage() << endl;
 								return &failure;
 							}
@@ -132,7 +121,7 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 							}
 						case CLIENT_RECVBUF:{
 								/* Receive file status (0 = available) */
-								if (UDT::ERROR == UDT::recvmsg(fhandle, (char*) &fileAvailable, sizeof(int))) {
+								if (UDT::ERROR == UDT::recv(fhandle, (char*) &fileAvailable, sizeof(int), 0)) {
 									cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
 									return 0;   
 								}
@@ -173,45 +162,18 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 }
 int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer){
 	
-<<<<<<< HEAD
-<<<<<<< HEAD
-	if (UDT::ERROR == (res = UDT::sendmsg(Ssocks->socks[index], (char *)buffer, bufsize, -1, true))) {
-		if(UDT::getlasterror().getErrorCode() != 6001){ //6001 == EASYNCSND
-			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl; 
-			return res;
-			}
-		else{
-			return -1;
-		}
-=======
-=======
->>>>>>> e111038... Sending Stream - Big Files issues -
 	printf("meta->bufsize: %i",Ssocks->meta->bufsize);
 	
 	if (UDT::ERROR == UDT::send(Ssocks->socks[index], (char *)buffer, Ssocks->meta->bufsize, 0)) {
 		cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl;
 		return 1;
-<<<<<<< HEAD
->>>>>>> e111038... Sending Stream - Big Files issues -
-=======
->>>>>>> e111038... Sending Stream - Big Files issues -
 	}
 
 	return 0;
 }
 int bufferRecv(UDTArray Ssocks, int index, unsigned char * buffer){
 	
-<<<<<<< HEAD
-<<<<<<< HEAD
-	int res;
-	if (UDT::ERROR == (res = UDT::recvmsg(Ssocks->socks[index], (char *)buffer, bufsize))) {
-		if(UDT::getlasterror().getErrorCode() != 6002){ //6001 == EASYNCSND
-=======
 	if (UDT::ERROR == UDT::recv(Ssocks->socks[index], (char *)buffer, Ssocks->meta->bufsize, 0)) {
->>>>>>> e111038... Sending Stream - Big Files issues -
-=======
-	if (UDT::ERROR == UDT::recv(Ssocks->socks[index], (char *)buffer, Ssocks->meta->bufsize, 0)) {
->>>>>>> e111038... Sending Stream - Big Files issues -
 			cout << "Receive: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 	}
@@ -229,7 +191,7 @@ int Transfer_destroy(UDTArray Ssocks){
 				long totalreceived = 0;
 				long buffreceived;
 				for (int j = 0; j < Ssocks->meta->k + Ssocks->meta->m; j++) {
-					if (UDT::ERROR == UDT::recvmsg(Ssocks->socks[j], (char *) &buffreceived, sizeof(long))) {
+					if (UDT::ERROR == UDT::recv(Ssocks->socks[j], (char *) &buffreceived, sizeof(long), 0)) {
 						cout << "buffersize send: " << UDT::getlasterror().getErrorMessage() << endl;
 					}
 					totalreceived+=buffreceived;
