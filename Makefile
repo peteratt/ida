@@ -87,9 +87,9 @@ zht: lib/ZHT/Makefile
 LIBS+=$(LIBSEc)
 
 examples: lib/libecwrapper.a
-	#$(CC) $(CFLAGS) examples/fileSenderTEST.c -o examples/fileSenderTEST $(LFLAGS)
+	$(CC) $(CFLAGS) examples/fileSenderTEST.c -o examples/fileSenderTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileSender.c -o examples/fileSender $(LFLAGS)
-	#$(CC) $(CFLAGS) examples/fileReceiverTEST.c -o examples/fileReceiverTEST $(LFLAGS)
+	$(CC) $(CFLAGS) examples/fileReceiverTEST.c -o examples/fileReceiverTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileReceiver.c -o examples/fileReceiver $(LFLAGS)
 	#$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 

@@ -63,7 +63,7 @@ int recvFile(UDTSOCKET * fhandleP, char * filepath){
 			return 1;
 		}
 
-		cout << "Now Waiting for data \n";
+		//cout << "Now Waiting for data \n";
 
 		/* receive the buffers */
 		int bufGroupSize = 1; //currently we receive 4 buffers before writing
@@ -90,7 +90,7 @@ int recvFile(UDTSOCKET * fhandleP, char * filepath){
 		}
 		
 		/* Send the number of bytes read as an ack */
-		cout << "Sending ACK with "<< recvBytes << "Bytes" << endl;
+		//cout << "Sending ACK with "<< recvBytes << "Bytes" << endl;
 		if (UDT::ERROR == UDT::send(fhandle, (char *)&recvBytes, sizeof(long), 0)) {
 			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
@@ -134,7 +134,7 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 
 		/* send the file */
 		int64_t offset = 0;
-		cout << "Now sending the file" << endl;
+		//cout << "Now sending the file" << endl;
 		if (UDT::ERROR == UDT::sendfile(fhandle, fileS, offset, totalsize)) {
 
 			/* DFZ: This error might be triggered if the file size is zero, which is fine. */
@@ -142,7 +142,7 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 			UDT::close(fhandle);
 			fileS.close();
 
-			cout << "sendfile: " << UDT::getlasterror().getErrorMessage() << endl;
+			//cout << "sendfile: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 		}
 
@@ -151,7 +151,7 @@ int sendFile(UDTSOCKET * fhandleP, char * filepath){
 			cout << "Receive ACK: " << UDT::getlasterror().getErrorMessage() << endl;
 			return 1;
 		}
-		cout <<  "Received ACK from client, now in peace with myself" << endl;
+		//cout <<  "Received ACK from client, now in peace with myself" << endl;
 
 		UDT::perfmon(fhandle, &trace);
 		/* cout << "speed = " << trace.mbpsSendRate << "Mbits/sec" << endl; */
@@ -200,9 +200,11 @@ void* connecHandler(void* usocket)
 	/* Choose the appropriate action in function of the operation requested */
 	switch(operationID){
 		case SERVER_RECVFILE:
+			cout << "Ingoing-File Request" << endl;
 			operationRes = recvFile(&fhandle, filepath);
 			break;
 		case SERVER_SENDFILE:
+			cout << "OutGoing-File Request" << endl;
 			operationRes = sendFile(&fhandle, filepath);
 			break;
 		default:

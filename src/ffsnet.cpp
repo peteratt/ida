@@ -126,10 +126,10 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 								}
 								
 								if(fileAvailable == 0){
-									cout << "Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
+									//cout << "Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
 								}
 								else{
-									cout << "NON AVAILABLE Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
+									//cout << "NON AVAILABLE Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
 									if(socksreqNumber < socksNumber){
 										socksreqNumber++;
 										everythingOK=1;
