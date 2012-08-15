@@ -273,8 +273,8 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	int currentIndex=0;
 
 	for (j = 0; j < n + m; j++) {
-		if(index[j+nbad] != j){
-			badBufIds[nbad++] = j; // There was a if(j < n) .....why?!, do we stop counting bad buffers after n is passed?
+		if(index[j-nbad] != j){
+			if(j < n) badBufIds[nbad++] = j; // There was a if(j < n) .....why?!, do we stop counting bad buffers after n is passed?
 		}
 		else{
 			goodBufIds[ngood++] = j;
@@ -305,7 +305,7 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 			totalTrans = 0;
 
 			while(retSend == -1 || totalTrans != bufsize){
-				retSend = bufferRecv_c(socks, index[j], buffers + j*bufsize + totalTrans, bufsize - totalTrans);//Push data into the sending queue
+				retSend = bufferRecv_c(socks, goodBufIds[j], buffers + j*bufsize + totalTrans, bufsize - totalTrans);//Push data into the sending queue
 				if(retSend != -1) totalTrans += retSend;
 			}
 			BytesTrans +=totalTrans;

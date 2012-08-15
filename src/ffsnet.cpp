@@ -65,10 +65,9 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 		struct comTransfer * current = meta->loc->transfers;
 		
 		int i,fileAvailable;
-		int everythingOK = 0; //yes by default
 		char port_str[6];
 		for(i=0; i < socksNumber; i++){			
-
+			int everythingOK = 0; //yes by default
 			sprintf(port_str, "%d", current->port);
 			
 			if (0 != getaddrinfo(current->hostName, port_str, &hints, &peer)) {
@@ -131,7 +130,7 @@ int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
 								}
 								else{
 									cout << "NON AVAILABLE Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
-									if(socksreqNumber < socksNumber-1){
+									if(socksreqNumber < socksNumber){
 										socksreqNumber++;
 										everythingOK=1;
 									}//if can't connect, then make sure to get one of the emergency one
@@ -216,7 +215,7 @@ int Transfer_destroy(UDTArray Ssocks){
 				}
 			case CLIENT_RECVBUF:{
 					for (int j = 0; j < Ssocks->meta->k; j++) {
-							dbgprintf("Sending ACK to socket %i\n",j,Ssocks->indexArray[j]);
+							dbgprintf("Sending ACK to socket %i\n",Ssocks->indexArray[j]);
 							
 							if (UDT::ERROR == UDT::send(Ssocks->socks[Ssocks->indexArray[j]], (char *)&resCode, sizeof(int), 0)) {
 								cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl; 
