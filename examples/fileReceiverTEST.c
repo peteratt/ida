@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 	int fileSize = ftell(file);
 	fclose(file);
 	
-	double throughputTotal = fileSize / (1000000 * totalTime.tv_sec + totalTime.tv_usec);
+	double throughputTotal = fileSize / (double)(1000000 * totalTime.tv_sec + totalTime.tv_usec);
 	
 	// printf's separated by commas for the CSV
 	printf("%s,%lu,%f\n", filename, fileSize, throughputTotal);

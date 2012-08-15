@@ -151,7 +151,6 @@ int ecFileEncode(struct metadata * meta){
 
 	/* Allocate/define the appropriate number of buffers */
 	void *buffers;
-
 	ec->alloc(&buffers, bufsize, &bufsize, context);
 	
 	// NOTE: In case encoding/networking have too different speeds, a buffer storing encoding data could be useful to make sure we are not overflowing the send buffer (or we need to make sure that it stops if the buffer is full)

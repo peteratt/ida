@@ -16,6 +16,7 @@ LFLAGS=-pthread # -lpthread does not work whereas -pthread does. This may be the
 LFLAGS+=-lecwrapper # Well...this is our library!
 
 PROTOBUF_HOME=/usr/local/include/google/protobuf # Your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
+# For HEC: PROTOBUF_HOME=/export/home/palvare3/protobuf
 CFLAGS+=-I$(PROTOBUF_HOME)
 LFLAGS+=-lprotobuf
 
@@ -94,7 +95,7 @@ examples: lib/libecwrapper.a
 	#$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
 bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a 
-	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(LFLAGS) # If problems: -L$(UDTLOC)/src -ludt -pthread
+	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd -L$(UDTLOC)/src -ludt -pthread
 
 lib/libecwrapper.a: obj libs $(OBJECTS)
 	mv obj/c/*.o obj/
