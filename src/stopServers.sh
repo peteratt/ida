@@ -1,18 +1,11 @@
 #!/bin/bash
 #Stop the servers
 
-PIDFILE=servers.pid
-TESTINGFOLDER=../testingEnv
+PIDFILE=/mnt/ssd/servers.pid
+TESTINGFOLDER=/mnt/ssd/idaData
 
 if [ -d "$TESTINGFOLDER" ]; then
-	while true; do
-		read -p "Do you wish to erase the entire folder $TESTINGFOLDER (this is irreversible)?" yn
-		case $yn in
-			[Yy]* ) rm -rf $TESTINGFOLDER; break;;
-			[Nn]* ) break;;
-			* ) echo "Please answer yes or no.";;
-		esac
-	done
+	rm -rf $TESTINGFOLDER
 fi
 
 if [ ! -f $PIDFILE ]; then
@@ -26,6 +19,6 @@ done < $PIDFILE
 
 
 
-rm -rf $PIDFILE
+rm $PIDFILE
 echo "............................................."
 echo "Have fun now\n"
