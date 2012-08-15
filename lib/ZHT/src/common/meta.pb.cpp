@@ -61,11 +61,10 @@ void protobuf_AssignDesc_meta_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Package));
   Package_Location_descriptor_ = Package_descriptor_->nested_type(0);
-  static const int Package_Location_offsets_[4] = {
+  static const int Package_Location_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package_Location, hostname_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package_Location, port_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package_Location, distantchunkname_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Package_Location, localchunkname_),
   };
   Package_Location_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -112,16 +111,16 @@ void protobuf_AddDesc_meta_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\nmeta.proto\"\371\002\n\007Package\022\023\n\013virtualPath\030"
+    "\n\nmeta.proto\"\341\002\n\007Package\022\023\n\013virtualPath\030"
     "\001 \001(\014\022\013\n\003num\030\002 \001(\005\022\024\n\014realFullPath\030\003 \001(\014"
     "\022\r\n\005isDir\030\004 \001(\010\022\020\n\010listItem\030\005 \003(\014\022\020\n\010ope"
     "nMode\030\006 \001(\005\022\014\n\004mode\030\007 \001(\005\022\021\n\tOperation\030\010"
     " \001(\005\022\021\n\treplicaNo\030\t \001(\005\022\t\n\001k\030\n \001(\005\022\t\n\001m\030"
     "\013 \001(\005\022\020\n\010fileSize\030\014 \001(\005\022\017\n\007bufsize\030\r \001(\005"
     "\022\023\n\013encodingLib\030\016 \001(\005\022#\n\010location\030\017 \003(\0132"
-    "\021.Package.Location\032\\\n\010Location\022\020\n\010hostna"
+    "\021.Package.Location\032D\n\010Location\022\020\n\010hostna"
     "me\030\001 \002(\t\022\014\n\004port\030\002 \001(\005\022\030\n\020distantChunkNa"
-    "me\030\003 \002(\t\022\026\n\016localChunkName\030\004 \002(\t", 392);
+    "me\030\003 \002(\t", 368);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "meta.proto", &protobuf_RegisterTypes);
   Package::default_instance_ = new Package();
@@ -145,7 +144,6 @@ struct StaticDescriptorInitializer_meta_2eproto {
 const int Package_Location::kHostnameFieldNumber;
 const int Package_Location::kPortFieldNumber;
 const int Package_Location::kDistantChunkNameFieldNumber;
-const int Package_Location::kLocalChunkNameFieldNumber;
 #endif  // !_MSC_VER
 
 Package_Location::Package_Location()
@@ -167,7 +165,6 @@ void Package_Location::SharedCtor() {
   hostname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   port_ = 0;
   distantchunkname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  localchunkname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -181,9 +178,6 @@ void Package_Location::SharedDtor() {
   }
   if (distantchunkname_ != &::google::protobuf::internal::kEmptyString) {
     delete distantchunkname_;
-  }
-  if (localchunkname_ != &::google::protobuf::internal::kEmptyString) {
-    delete localchunkname_;
   }
   if (this != default_instance_) {
   }
@@ -220,11 +214,6 @@ void Package_Location::Clear() {
     if (has_distantchunkname()) {
       if (distantchunkname_ != &::google::protobuf::internal::kEmptyString) {
         distantchunkname_->clear();
-      }
-    }
-    if (has_localchunkname()) {
-      if (localchunkname_ != &::google::protobuf::internal::kEmptyString) {
-        localchunkname_->clear();
       }
     }
   }
@@ -283,23 +272,6 @@ bool Package_Location::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(34)) goto parse_localChunkName;
-        break;
-      }
-      
-      // required string localChunkName = 4;
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_localChunkName:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_localchunkname()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->localchunkname().data(), this->localchunkname().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -345,15 +317,6 @@ void Package_Location::SerializeWithCachedSizes(
       3, this->distantchunkname(), output);
   }
   
-  // required string localChunkName = 4;
-  if (has_localchunkname()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->localchunkname().data(), this->localchunkname().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      4, this->localchunkname(), output);
-  }
-  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -387,16 +350,6 @@ void Package_Location::SerializeWithCachedSizes(
         3, this->distantchunkname(), target);
   }
   
-  // required string localChunkName = 4;
-  if (has_localchunkname()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->localchunkname().data(), this->localchunkname().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->localchunkname(), target);
-  }
-  
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -427,13 +380,6 @@ int Package_Location::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->distantchunkname());
-    }
-    
-    // required string localChunkName = 4;
-    if (has_localchunkname()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->localchunkname());
     }
     
   }
@@ -472,9 +418,6 @@ void Package_Location::MergeFrom(const Package_Location& from) {
     if (from.has_distantchunkname()) {
       set_distantchunkname(from.distantchunkname());
     }
-    if (from.has_localchunkname()) {
-      set_localchunkname(from.localchunkname());
-    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -492,7 +435,7 @@ void Package_Location::CopyFrom(const Package_Location& from) {
 }
 
 bool Package_Location::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000000d) != 0x0000000d) return false;
+  if ((_has_bits_[0] & 0x00000005) != 0x00000005) return false;
   
   return true;
 }
@@ -502,7 +445,6 @@ void Package_Location::Swap(Package_Location* other) {
     std::swap(hostname_, other->hostname_);
     std::swap(port_, other->port_);
     std::swap(distantchunkname_, other->distantchunkname_);
-    std::swap(localchunkname_, other->localchunkname_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

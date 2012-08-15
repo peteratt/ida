@@ -39,3 +39,23 @@ char* get_filename_from_path(char* filepath){
 	else 
 		return filename+1;
 }
+
+int getBufferNumbers(int filesize,int k , int bufsize){
+		int buffernumbers = filesize / (bufsize*k);
+		if(filesize % (bufsize*k) != 0) buffernumbers++;
+		
+		return buffernumbers;
+}
+
+
+int getchunksize(int filesize, int k, int bufsize){
+	//k is the number of data chunks in EC
+	//filesize is the size of a file
+	// bufsize is the size of a buffer in B
+	
+	// returns the size of a chunk
+
+	return getBufferNumbers(filesize,k , bufsize)*bufsize;
+
+}
+

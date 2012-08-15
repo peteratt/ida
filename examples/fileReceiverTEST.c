@@ -10,8 +10,8 @@
 #include <errno.h>
 #include <string.h>
 
-#include <ffsnet_bridger.h>
 #include <ec.h>
+#include <ida.h>
 
 #include "../inc/benchmark.h"
 
@@ -30,35 +30,30 @@ int main(int argc, char* argv[]) {
 
 	ida_init("../src/zhtNeighborFile", "../lib/ZHT/zht.cfg");
 	
-	struct metadata* meta = ecLookupMetadata(filename);
-	
-	ecFileReceive(filename, meta->k, meta->m, meta->loc);
-	
-	// Timestamp after receiving, to retrieve overhead
-	gettimeofday(&tvReceiving, NULL);
-	timeval_print(&tvReceiving);
-
-	ecFileDecode(filename, meta);
+	ida_download(filename);
 	
 	// Take final timestamp
 	gettimeofday(&tvEnd, NULL);
 	timeval_print(&tvEnd);
 	
 	// Compute throughput:
-	timeval_subtract(&t1, &tvReceiving, &tvBegin);
-	timeval_subtract(&t2, &tvEnd, &tvReceiving);
 	timeval_subtract(&totalTime, &tvEnd, &tvBegin);
 	
-	double throughputReceiving = meta->fileSize / (double)(1000000 * t1.tv_sec + t1.tv_usec);
-	double throughputDecoding = meta->fileSize / (double)(1000000 * t2.tv_sec + t2.tv_usec);
-	double throughputTotal = meta->fileSize / (double)(1000000 * totalTime.tv_sec + totalTime.tv_usec);
+	// Filesize
+	FILE *file;
+	file = fopen(filename, "rb");
+	if(!file){
+		dbgprintf("Metadata Fill ERROR: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);//maybe a return 1 could be appropriate?
+	}
+	fseek(file, 0L, SEEK_END);
+	int fileSize = ftell(file);
+	fclose(file);
+	
+	double throughputTotal = fileSize / (1000000 * totalTime.tv_sec + totalTime.tv_usec);
 	
 	// printf's separated by commas for the CSV
-	printf("%s,%lu,%f,%f,%f\n", meta->filename, meta->fileSize, throughputReceiving, throughputDecoding, throughputTotal);
-	
-	free_struct_comLocations(meta->loc);//Free the structure
-	free(meta->loc);
-	free(meta);
+	printf("%s,%lu,%f\n", filename, fileSize, throughputTotal);
 	
 	ida_finalize();
 	return 0;

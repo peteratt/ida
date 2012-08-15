@@ -19,7 +19,7 @@ PROTOBUF_HOME=/usr/local/include/google/protobuf # Your Google Protobuf location
 CFLAGS+=-I$(PROTOBUF_HOME)
 LFLAGS+=-lprotobuf
 
-OBJECTS=obj/c/ec.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o obj/cpp/zht_bridger.o obj/c/ida.o obj/c/ida_util.o obj/c/benchmark.o
+OBJECTS=obj/c/ec.o obj/c/ida_util.o obj/cpp/ffsnet.o obj/cpp/ffsnet_bridger.o obj/cpp/zht_bridger.o obj/c/ida.o obj/c/benchmark.o
 
 .PHONY: clean jerasure examples
 
@@ -32,6 +32,7 @@ all:
 
 ifeq ($(debug),1)
 CFLAGS+=-D DEBUG
+CPPFLAGS+=-D DEBUG
 endif
 #######################################################
 #Jerasure-1.2
@@ -90,7 +91,7 @@ examples: lib/libecwrapper.a
 	$(CC) $(CFLAGS) examples/fileSender.c -o examples/fileSender $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileReceiverTEST.c -o examples/fileReceiverTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileReceiver.c -o examples/fileReceiver $(LFLAGS)
-	$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
+	#$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
 bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a 
 	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd $(LFLAGS) # If problems: -L$(UDTLOC)/src -ludt -pthread

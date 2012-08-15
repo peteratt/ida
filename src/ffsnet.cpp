@@ -1,237 +1,247 @@
-/**
- * File name: ffsnet.cpp
+/* Author:  Corentin Debains
+ * Email:   cdebains@iit.edu
  *
- * Function: utilities for FusionFS network transfer
  *
- * Author: dzhao8@hawk.iit.edu
- *
- * Update history:
- *		- 06/18/2012: initial development
- *
- * To compile this single file:
- * 		g++ ffsnet.cpp -c -o ffsnet.o -I../src -L../src -ludt -lstdc++ -lpthread
- *		NOTE: -I../src (similarly to -L../src) means to include the directory of the udt library, i.e. libudt.so 
- *
- * To compile it to a shared library:
- * 		g++ ffsnet.cpp -fPIC --shared -o libffsnet.so -I../src -L../src -ludt -lstdc++ -lpthread
  */
 
+#include <iostream>
+#include <udt.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <fstream>
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
-#include <udt.h>
+#include <malloc.h>
+#include <string.h>
 
+#include "../inc/ffsnetCPP.h"
 #include "../inc/ffsnet.h"
+
+int failure = -1;
 
 using namespace std;
 
-/*
- * wrapper for download
- */
-int 
-ffs_recvfile(const char *proto, const char *remote_ip, const char *server_port, const char *remote_filename, const char *local_filename)
-{
-	/* only support UDT for now */
-	if (strcmp("udt", proto)) {
-		cerr << "Only UDT supported for now. " << endl;
-		return -1;
-	}
+int * Transfer_init(UDTArray * SsocksP, struct metadata * meta, int operation){
+
+		/* use this function to initialize the UDT library */
+		UDT::startup();
+
+		/* allocate the struct and create the sockets */
+		UDTArray Ssocks = (struct UDTArray_s *) malloc(sizeof(struct UDTArray_s));
+		*SsocksP = Ssocks;
+		Ssocks->socks = (UDTSOCKET *) malloc(sizeof(UDTSOCKET)*(meta->k+meta->m));
+		
+		Ssocks->meta = meta;
+		
+		int socksNumber = meta->k + meta->m;
+		Ssocks->operation = operation;
+		int socksreqNumber;
+		switch(operation){
+			case CLIENT_SENDBUF:
+				socksreqNumber = meta->k + meta->m;
+				break;
+			case CLIENT_RECVBUF:
+				socksreqNumber = meta->k;
+				break;
+			default:
+				socksreqNumber = meta->k + meta->m;
+				break;
+		}
+		
+		int * indexArray = (int *) malloc(sizeof(int)*socksreqNumber);
+		int curIndex = 0;
+		
+		/* Calculate buffer numbers */
+		int buffernumbers = (int)meta->fileSize / (meta->bufsize*meta->k);
+		if((int)meta->fileSize % (meta->bufsize*meta->k) != 0) buffernumbers++;
+
+		/* create sockets */
+		struct addrinfo hints, *peer;
+		bool blocking = false;
+
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_flags = AI_PASSIVE;
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+
+		UDTSOCKET fhandle;
+		struct comTransfer * current = meta->loc->transfers;
+		
+		int i,fileAvailable;
+		char port_str[6];
+		for(i=0; i < socksNumber; i++){			
+			int everythingOK = 0; //yes by default
+			sprintf(port_str, "%d", current->port);
+			
+			if (0 != getaddrinfo(current->hostName, port_str, &hints, &peer)) {
+				cerr << "incorrect server/peer address. " << current->hostName << ":" << port_str << endl;
+				return &failure;
+			}
+			
+			Ssocks->socks[i] = UDT::socket(hints.ai_family, hints.ai_socktype, hints.ai_protocol);
+			fhandle = Ssocks->socks[i];
 	
-	if (-1 == _recvfile_udt(remote_ip, server_port, remote_filename, local_filename)) {
-		cerr << "Error in _recvfile_udt(). " << endl;
-		return -1;		
-	}
+			if(i < socksreqNumber){//only connect the required sockets (send = all; recv = k)
+				if (UDT::ERROR == UDT::connect(Ssocks->socks[i], peer->ai_addr, peer->ai_addrlen)) {
+					cerr << "connect: " << UDT::getlasterror().getErrorMessage() << endl;
+					if(socksreqNumber < socksNumber-1) socksreqNumber++;//if can't connect, then make sure to get one of the emergency one
+					else return &failure;
+				}
+				else{
+					// send the request type
+					int opeAddress = operation;
+					if (UDT::ERROR == UDT::send(fhandle, (char*)&operation, sizeof(int), 0))	{
+						cout << "opeSend: " << UDT::getlasterror().getErrorMessage() << endl;
+						return &failure;
+					}
+					// send the filename length
+					int len = strlen(current->distantChunkName);
+					if (UDT::ERROR == UDT::send(fhandle, (char*)&len, sizeof(int), 0)) {
+						cout << "filename len Send: " << UDT::getlasterror().getErrorMessage() << endl;
+						return &failure;
+					}
+					// send the filename
+					if (UDT::ERROR == UDT::send(fhandle, current->distantChunkName, len, 0)) {
+						cout << "filename send: " << UDT::getlasterror().getErrorMessage() << endl;
+						return &failure;
+					}
+					
+					switch(operation){
+						case CLIENT_SENDBUF:{
+							/* send buffersize information */
+							if (UDT::ERROR == UDT::send(fhandle, (char *) &(meta->bufsize), sizeof(int), 0)) {
+								cout << "buffersize send: " << UDT::getlasterror().getErrorMessage() << endl;
+								return &failure;
+							}
+							/* send buffernumbers information */
+							if (UDT::ERROR == UDT::send(fhandle, (char *) &(buffernumbers), sizeof(int), 0)) {
+								cout << "buffernumbers send: " << UDT::getlasterror().getErrorMessage() << endl;
+								return &failure;
+							}
+							UDT::setsockopt(fhandle, 0, UDT_SNDSYN, &blocking, sizeof(bool)); //makes the socket non-blocking
+							break;
+							}
+						case CLIENT_RECVBUF:{
+								/* Receive file status (0 = available) */
+								if (UDT::ERROR == UDT::recv(fhandle, (char*) &fileAvailable, sizeof(int), 0)) {
+									cout << "recv: " << UDT::getlasterror().getErrorMessage() << endl;
+									return 0;   
+								}
+								
+								if(fileAvailable == 0){
+									//cout << "Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
+								}
+								else{
+									//cout << "NON AVAILABLE Socket number:" << i << ";Index:" << curIndex << ";ChunkName:" << current->distantChunkName << endl;
+									if(socksreqNumber < socksNumber){
+										socksreqNumber++;
+										everythingOK=1;
+									}//if can't connect, then make sure to get one of the emergency one
+									else return &failure;
+								}
+								break;
+							}
+						default:
+							break;
+					
+					}
+					// Add the socket to the index (this socket is open and file is available)
+					if(everythingOK == 0) indexArray[curIndex++]=i;
+				}
+			}
+			current = current->next;
+		}
+		
+		freeaddrinfo(peer);
+		Ssocks->socknumber = ++i;
+		
+		
+		Ssocks->indexArray = indexArray;
+		return indexArray;
+		
+
+		
+}
+int bufferSend(UDTArray Ssocks, int index, unsigned char * buffer, int bufsize){
+	//Return -1 if socket is full (in non-blocking mode)
+	int res;
 	
-	return 0;
+	if (UDT::ERROR == (res = UDT::send(Ssocks->socks[index], (char *)buffer, bufsize, 0))) {
+		if(UDT::getlasterror().getErrorCode() != 6001){ //6001 == EASYNCSND
+			cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl; 
+			exit(1); //fail :(
+		}
+		else{
+			return -1;
+		}
+	}
+
+	return res;
+}
+int bufferRecv(UDTArray Ssocks, int index, unsigned char * buffer, int bufsize){
+	//Return -1 if socket is empty (in non-blocking mode)
+	int res;
+	
+	if (UDT::ERROR == (res = UDT::recv(Ssocks->socks[index], (char *)buffer, bufsize, 0))) {
+		if(UDT::getlasterror().getErrorCode() != 6002){ //6001 == EASYNCRCV
+			cout << "Receive: " << UDT::getlasterror().getErrorMessage() << endl; 
+			exit(1); //fail :(
+		}
+		else{
+			return -1;
+		}
+	}
+
+	return res;
 }
 
-/*
- * wrapper for upload
- */
-int 
-ffs_sendfile(const char *proto, const char *remote_ip, const char *server_port, const char *local_filename, const char *remote_filename)
-{
-	/* only support UDT for now */
-	if (strcmp("udt", proto)) {
-		cerr << "Only UDT supported for now. " << endl;
-		return -1;
+int Transfer_destroy(UDTArray Ssocks){
+
+	int resCode = 1;
+
+	switch(Ssocks->operation){
+			case CLIENT_SENDBUF:{
+				/* Receive ACK */
+				long totalreceived = 0;
+				long buffreceived;
+				for (int j = 0; j < Ssocks->meta->k + Ssocks->meta->m; j++) {
+					if (UDT::ERROR == UDT::recv(Ssocks->socks[j], (char *) &buffreceived, sizeof(long), 0)) {
+						cout << "buffersize send: " << UDT::getlasterror().getErrorMessage() << endl;
+					}
+					totalreceived+=buffreceived;
+				}
+				if(totalreceived < Ssocks->meta->fileSize){
+					cout << "ACK NOT RELEVANT, the file may have not been well transfered" << endl;
+				}
+				
+				break;
+				}
+			case CLIENT_RECVBUF:{
+					for (int j = 0; j < Ssocks->meta->k; j++) {
+							dbgprintf("Sending ACK to socket %i\n",Ssocks->indexArray[j]);
+							
+							if (UDT::ERROR == UDT::send(Ssocks->socks[Ssocks->indexArray[j]], (char *)&resCode, sizeof(int), 0)) {
+								cout << "Send: " << UDT::getlasterror().getErrorMessage() << endl; 
+								exit(1);//fail!	
+							}
+					}
+				break;
+				}
+			default:
+				break;
+	
+	}
+
+	
+	
+	int i;
+	for(i=0; i < Ssocks->socknumber; i++){
+		UDT::close(Ssocks->socks[i]);
+		//cout << "Closed socket" << i << endl;
 	}
 	
-	if (-1 == _sendfile_udt(remote_ip, server_port, local_filename, remote_filename)) {
-		cerr << "Error in _sendfile_udt(). " << endl;
-		return -1;		
-	}
+	free(Ssocks->indexArray);
+	free(Ssocks);
 	
-	return 0;
-}
-
-/*
- * download remote_filename from remoteip:server_port and save as local_filename
- */
-static int 
-_recvfile_udt(const char *remote_ip, const char *server_port, const char *remote_filename, const char *local_filename)
-{
-	/* use this function to initialize the UDT library */
-	UDT::startup();
-
-	struct addrinfo hints, *peer;
-
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_flags = AI_PASSIVE;
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-
-	UDTSOCKET fhandle = UDT::socket(hints.ai_family, hints.ai_socktype, hints.ai_protocol);
-
-	if (0 != getaddrinfo(remote_ip, server_port, &hints, &peer)) {
-		cout << "incorrect server/peer address. " << remote_ip << ":" << server_port << endl;
-		return -1;
-	}
-
-	/* connect to the server, implict bind */
-	if (UDT::ERROR == UDT::connect(fhandle, peer->ai_addr, peer->ai_addrlen)) {
-		cout << "connect: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	freeaddrinfo(peer);
-
-
-	/* send name information of the requested file */
-	int len = strlen(remote_filename);
-
-	/* send 0 to indicate this is to receive */
-	int zero = 0;
-	if (UDT::ERROR == UDT::send(fhandle, (char*)&zero, sizeof(int), 0))	{
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	if (UDT::ERROR == UDT::send(fhandle, (char*)&len, sizeof(int), 0)) {
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	if (UDT::ERROR == UDT::send(fhandle, remote_filename, len, 0)) {
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	/* get size information */
-	int64_t size;
-	if (UDT::ERROR == UDT::recv(fhandle, (char*)&size, sizeof(int64_t), 0))	{
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	if (size < 0) {
-		cout << "no such file " << remote_filename << " on the server\n";
-		return -1;
-	}
-
-	/* receive the file */
-	fstream ofs(local_filename, ios::out | ios::binary | ios::trunc);
-	int64_t recvsize; 
-	int64_t offset = 0;
-
-	if (UDT::ERROR == (recvsize = UDT::recvfile(fhandle, ofs, offset, size))) {
-		cout << "recvfile: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	UDT::close(fhandle);
-
-	ofs.close();
-
 	/* use this function to release the UDT library */
 	UDT::cleanup();	
-}
-
-/*
- * upload local_filename to remoteip:server_port and rename it to remote_filename
- */
-static int 
-_sendfile_udt(const char *remote_ip, const char *server_port, const char *local_filename, const char *remote_filename)
-{
-	/* use this function to initialize the UDT library */
-	UDT::startup();
-
-	/* create socket */
-	struct addrinfo hints, *peer;
-
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_flags = AI_PASSIVE;
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-
-	UDTSOCKET fhandle = UDT::socket(hints.ai_family, hints.ai_socktype, hints.ai_protocol);
-
-	if (0 != getaddrinfo(remote_ip, server_port, &hints, &peer)) {
-		cout << "incorrect server/peer address. " << remote_ip << ":" << server_port << endl;
-		return -1;
-	}
-
-	/* connect to the server, implict bind */
-	if (UDT::ERROR == UDT::connect(fhandle, peer->ai_addr, peer->ai_addrlen)) {
-		cout << "connect: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	freeaddrinfo(peer);
-
-	/* send name information of the requested file on the server */
-	int len = strlen(remote_filename);
-
-	/* send 1 to indicate this is to upload */
-	int one = 1;
-	if (UDT::ERROR == UDT::send(fhandle, (char*)&one, sizeof(int), 0)) {
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	if (UDT::ERROR == UDT::send(fhandle, (char*)&len, sizeof(int), 0)) {
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	if (UDT::ERROR == UDT::send(fhandle, remote_filename, len, 0)) {
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return -1;
-	}
-
-	/* open the file to read */
-	fstream ifs(local_filename, ios::in | ios::binary);
-
-	ifs.seekg(0, ios::end);
-	int64_t size = ifs.tellg();
-	ifs.seekg(0, ios::beg);
-
-	/* send file size information */
-	if (UDT::ERROR == UDT::send(fhandle, (char*)&size, sizeof(int64_t), 0)) {
-		cout << "send: " << UDT::getlasterror().getErrorMessage() << endl;
-		return 0;
-	}
-
-	UDT::TRACEINFO trace;
-	UDT::perfmon(fhandle, &trace);
-
-	// send the file
-	int64_t offset = 0;
-	if (UDT::ERROR == UDT::sendfile(fhandle, ifs, offset, size)) {
-		cout << "sendfile: " << UDT::getlasterror().getErrorMessage() << endl;
-		return 0;
-	}
-
-	UDT::perfmon(fhandle, &trace);
-	/* cout << "speed = " << trace.mbpsSendRate << "Mbits/sec" << endl; */
-
-	UDT::close(fhandle);
-
-	ifs.close();   
-
-	/* use this function to release the UDT library */
-	UDT::cleanup();	
+	
+	return 0;
 }

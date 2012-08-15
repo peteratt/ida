@@ -9,10 +9,11 @@
 #include <malloc.h>
  
 int ida_send(char * filename, int k, int m, int bufsize){
-	struct metadata* meta = ecFileEncode(filename, k, m, bufsize,JERASURERS);
+
+	struct metadata  * meta;
+	ecfillmeta(filename, filename, k, m , GIBRALTAR, bufsize, &meta); //currently virtual name = physical name
 	
-	meta->loc = (struct comLocations *) malloc(sizeof(struct comLocations));
-	ecFileSend(filename, k, m, meta->loc);
+	ecFileEncode(meta);
 	
 	ecInsertMetadata(meta);
 
@@ -24,11 +25,9 @@ int ida_send(char * filename, int k, int m, int bufsize){
 }
 int ida_download(char * filename){
 
-	struct metadata* meta = ecLookupMetadata(filename);
-	
-	ecFileReceive(filename, meta->k, meta->m, meta->loc);
+	struct metadata* meta = ecLookupMetadata(filename);//filename = virtual path here (key)
 
-	ecFileDecode(filename, meta);
+	ecFileDecode(filename, meta);//filename = physical path here
 	
 	free_struct_comLocations(meta->loc);//Free the structure
 	free(meta->loc);

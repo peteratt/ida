@@ -24,7 +24,6 @@ message Package{
 		required string hostname = 1;
 		optional int32 port = 2;
 		required string distantChunkName = 3;
-		required string localChunkName = 4;
 	}
 	repeated Location location = 15;
 }
