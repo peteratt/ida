@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include <ec.h>
+#include <ida.h>
 
 #include "../inc/benchmark.h"
 

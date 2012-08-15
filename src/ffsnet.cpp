@@ -234,7 +234,7 @@ int Transfer_destroy(UDTArray Ssocks){
 	int i;
 	for(i=0; i < Ssocks->socknumber; i++){
 		UDT::close(Ssocks->socks[i]);
-		cout << "Closed socket" << i << endl;
+		//cout << "Closed socket" << i << endl;
 	}
 	
 	free(Ssocks->indexArray);

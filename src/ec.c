@@ -181,7 +181,7 @@ int ecFileEncode(struct metadata * meta){
 	int retSend=-1;
 	int totalTrans;
 	
-	int BytesTrans=0;
+	//int BytesTrans=0;
 	while(!feof(source)){
 		//1-read		
 		bytesRead = fread(buffers,sizeof(unsigned char), bufsize*k, source);
@@ -202,9 +202,9 @@ int ecFileEncode(struct metadata * meta){
 						retSend = bufferSend_c(socks, index[j], (unsigned char *)buffers + j*bufsize + totalTrans, bufsize - totalTrans);//Push data into the sending queue
 						if(retSend != -1) totalTrans += retSend;
 					}
-					BytesTrans +=totalTrans;
+					//BytesTrans +=totalTrans;
 			}
-			dbgprintf("BytesTrans:%i\n",BytesTrans);
+			//dbgprintf("BytesTrans:%i\n",BytesTrans);
 		}
 	}
 
@@ -297,7 +297,7 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 	int retSend=-1;
 	int totalTrans;
 	
-	int BytesTrans = 0;
+	//int BytesTrans = 0;
 	
 	while (unfinished) {
 		for (j = 0; j < ngood; j++) {
@@ -308,8 +308,8 @@ int ecFileDecode(char *filepath, struct metadata * meta) {
 				retSend = bufferRecv_c(socks, goodBufIds[j], buffers + j*bufsize + totalTrans, bufsize - totalTrans);//Push data into the sending queue
 				if(retSend != -1) totalTrans += retSend;
 			}
-			BytesTrans +=totalTrans;
-			dbgprintf("BytesTrans:%i\n",BytesTrans);
+			//BytesTrans +=totalTrans;
+			//dbgprintf("BytesTrans:%i\n",BytesTrans);
 		}
 	
 		int buf_ids[256];
@@ -421,138 +421,6 @@ void free_struct_comLocations(struct comLocations * loc){
 		free(tofree);
 	}
 }
-
-/* DEPRECATED SEND FROM v1 */
-/*
-void * threadSendFunc(void * args){
-		struct comTransfer * curTransfer = (struct comTransfer *)args;
-		
-		char port_str[10];
-		sprintf(port_str, "%d", curTransfer->port);
-		
-		dbgprintf("Sending: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		ffs_sendfile_c("udt", curTransfer->hostName, port_str,curTransfer->localChunkName, curTransfer->distantChunkName);
-		
-		return NULL;
-};
-
-int ecFileSend(char *filepath, int k, int m, struct comLocations * loc) {
-	int n = k + m;
-	int i;
-	
-	pthread_t threads[n];
-	
-	loc->locationsNumber = n;
-	
-	getSendLocations(filepath,loc,n);
-	
-	struct comTransfer * curTransfer = loc->transfers;
-	
-	for (i = 0; i < loc->locationsNumber; i++) {
-		// Send the chunks through UDT to the server
-		
-		// TODO: Needs error treatment
-		pthread_create(&threads[i], NULL, &threadSendFunc, (void *)curTransfer);
-		curTransfer = curTransfer->next;
-	}
-	
-	for (i = 0; i < loc->locationsNumber; i++) {
-		pthread_join(threads[i], NULL);
-	}
-	
-	char filenameDest[256];
-	for(i=0; i < loc->locationsNumber; i++){
-		sprintf(filenameDest, "%s%s/%s.%d",CACHE_DIR_PATH,CACHE_DIR_NAME, get_filename_from_path(filepath), i);
-		remove(filenameDest);
-	}
-	
-	return 0;
-}
-*/
-/* DEPRECATED SEND FROM v1 end*/
-
-/* DEPRECATED RECV FROM v1 */
-/*
-void * threadRecvFunc(void * args){
-		struct comTransfer * curTransfer = (struct comTransfer *)args;
-		int * retval = (int *) malloc(sizeof(int));
-		
-		char port_str[10];
-		sprintf(port_str, "%d", curTransfer->port);
-		
-		dbgprintf("Receiving: host: %s; port:%s; distantName: %s; localName: %s \n",curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		*retval = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName, curTransfer->localChunkName);
-		
-		pthread_exit((void *)retval);
-		
-		return 0;
-};
-
-int ecFileReceive(char *filepath, int k, int m, struct comLocations * loc) {
-	int n = k + m;
-	int i;
-	
-	
-	pthread_t threads[k];
-	
-	loc->locationsNumber = n; 
-	
-	getRecvLocations(filepath,loc,k); // the minimum we need is k (no worries if we get less locations)
-	
-	// Create destination Directory (cache) if doesn't exist 
-	char dirName[256];
-	sprintf(dirName, "%s%s",CACHE_DIR_PATH,CACHE_DIR_NAME);
-	mkdir(dirName, 0777);
-	
-	
-	struct comTransfer * curTransfer = loc->transfers;
-	
-	for (i = 0; i < k; i++) {
-		// Receive the chunks from the servers
-		
-		// TODO: Needs error treatment
-		pthread_create(&threads[i], NULL, &threadRecvFunc, (void *)curTransfer);
-		curTransfer = curTransfer->next;
-	}
-	
-	
-
-	int failedTransfers = 0;
-	
-	for (i = 0; i < k; i++) {
-		void * thread_retval;
-		pthread_join(threads[i], &thread_retval);
-		
-		failedTransfers -= *((int *)thread_retval); //retval for fail is -1
-		free(thread_retval);
-	}
-
-	
-	if(failedTransfers > 0){
-		while(failedTransfers > 0 && curTransfer != NULL){
-			char port_str[10];
-			sprintf(port_str, "%d", curTransfer->port);
-			
-			int retFFS;
-			//dbgprintf("Receiving(parity): host: %s; port:%s; distantName: %s;\n",curTransfer->hostName, port_str, curTransfer->distantChunkName);
-			//retFFS = ffs_recvfile_c("udt", curTransfer->hostName, port_str, curTransfer->distantChunkName);
-			
-			if(retFFS == 0){
-				failedTransfers--;
-			}
-
-			
-			curTransfer = curTransfer->next;
-		}
-
-	}
-	
-	if(failedTransfers > 0) return 1; //NOT ENOUGH CHUNKS
-	
-	return 0;
-}
-*/
-/* DEPRECATED SEND FROM v1 */
 
 int ecInsertMetadata(struct metadata* meta) {
 	
