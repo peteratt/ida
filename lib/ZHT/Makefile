@@ -1,21 +1,23 @@
 # Author:  Corentin Debains
 # Email:   cdebains@iit.edu
 #
+# Author:  Pedro Alvarez-Tabio
+# Email:   palvare3@iit.edu
 
 CXX=g++
 CC=gcc
 CPPFLAGS=-Xlinker -zmuldefs
-CFLAGS=-Llib -L/usr/local/lib -Iinc
+CFLAGS=-Llib -L${HOME}/protobuf_old/lib -Iinc
 LFLAGS=-lzht
-LFLAGS+=-lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotobuf-c
+LFLAGS+=-lstdc++ -lrt -lpthread -lm -lc -lprotobuf# -lprotobuf-c
 
-PROTOBUF_HOME=/usr/local/include/google/protobuf #your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf) Additional NOTE: This may be useless if you added PROTOBUF to your LD_LIBRARY_PATH
-
+PROTOBUF_HOME=${HOME}/protobuf_old#your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf) Additional NOTE: This may be useless if you added PROTOBUF to your LD_LIBRARY_PATH
+PROTOBUF_C_HOME=${HOME}/protobuf_c
 #SOURCES=$(wildcard src/common/*.cpp)
 #OBJECTS=$(SOURCES:.cpp=.o)
-OBJECTS=obj/meta.pb.o obj/meta.pb-c.o obj/net_util.o obj/novoht.o obj/zht_util.o obj/lru_cache.o
+OBJECTS=obj/meta.pb.o obj/net_util.o obj/novoht.o obj/zht_util.o obj/lru_cache.o# obj/meta.pb-c.o
 
-CFLAGS+=-I$(PROTOBUF_HOME)
+CFLAGS+=-I$(PROTOBUF_C_HOME)/include
 
 .PHONY: clean examples clients
 
@@ -35,7 +37,7 @@ bin/server_zht:
 
 examples:
 	$(CXX) $(CPPFLAGS) $(CFLAGS) examples/benchmark_client.cpp -o examples/benchmark_client $(LFLAGS)
-	$(CC) $(CFLAGS) examples/c_zhtclient_main.c -o examples/c_zhtclient_main $(LFLAGS)
+	#$(CC) $(CFLAGS) examples/c_zhtclient_main.c -o examples/c_zhtclient_main $(LFLAGS)
 	$(CXX) $(CPPFLAGS) $(CFLAGS) examples/testProtocBuf.cpp -o examples/testProtocBuf $(LFLAGS)
 
 lib/libzht.a: $(OBJECTS) clients
@@ -58,13 +60,13 @@ obj/meta.pb-c.o: src/common/meta.pb-c.c
 
 gProto: src/misc/meta.proto
 	rm src/common/*.pb.cpp inc/*.pb.h
-	protoc -I=src/misc/ --cpp_out=src/common src/misc/meta.proto
+	$(PROTOBUF_HOME)/bin/protoc -I=src/misc/ --cpp_out=src/common src/misc/meta.proto
 	mv src/common/*.h inc/
 	rename 's/\.cc/.cpp/' src/common/*.cc
 	
 gProto-c: src/misc/meta.proto
 	rm src/common/*.pb-c.c inc/*.pb-c.h
-	protoc-c -I=src/misc/ --c_out=src/common src/misc/meta.proto
+	$(PROTOBUF_C_HOME)/bin/protoc-c -I=src/misc/ --c_out=src/common src/misc/meta.proto
 	mv src/common/*.h inc/
 	
 clean:
