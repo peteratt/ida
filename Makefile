@@ -13,7 +13,7 @@ CPPFLAGS=-g -lstdc++ -Llib -Iinc
 
 LFLAGS=-pthread # -lpthread does not work whereas -pthread does. This may be the contrary for cpp binaries compilation.
 
-LFLAGS+=-lecwrapper # Well...this is our library!
+LFLAGS+=-lida # Well...this is our library!
 
 PROTOBUF_HOME=/usr/local/include/google/protobuf # Your Google Protobuf location here :) (Default is:/usr/local/include/google/protobuf)
 # For HEC: PROTOBUF_HOME=/export/home/palvare3/protobuf
@@ -87,20 +87,20 @@ zht: lib/ZHT/Makefile
 ######################################################
 LIBS+=$(LIBSEc)
 
-examples: lib/libecwrapper.a
+examples: lib/libida.a
 	$(CC) $(CFLAGS) examples/fileSenderTEST.c -o examples/fileSenderTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileSender.c -o examples/fileSender $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileReceiverTEST.c -o examples/fileReceiverTEST $(LFLAGS)
 	$(CC) $(CFLAGS) examples/fileReceiver.c -o examples/fileReceiver $(LFLAGS)
 	#$(CC) $(CFLAGS) examples/ffsnet_test_c.c -o examples/ffsnet_test_c $(LFLAGS)
 
-bin/ffsnetd: src/ffsnetd.cpp lib/libecwrapper.a 
+bin/ffsnetd: src/ffsnetd.cpp lib/libida.a 
 	$(CXX) $(CPPFLAGS) src/ffsnetd.cpp -o bin/ffsnetd -L$(UDTLOC)/src -ludt -pthread
 
-lib/libecwrapper.a: obj libs $(OBJECTS)
+lib/libida.a: obj libs $(OBJECTS)
 	mv obj/c/*.o obj/
 	mv obj/cpp/*.o obj/
-	ar rus lib/libecwrapper.a obj/*.o 
+	ar rus lib/libida.a obj/*.o 
 
 # If you don't have CUDA, remove lib/libgibraltar.a
 libs: $(LIBSEc) zht libudt
